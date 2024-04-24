@@ -4,7 +4,7 @@
 
 ```mermaid
 sequenceDiagram
-%%{ init: { 'sequence': { 'noteAlign': 'left', 'messageAlign': 'left'} } }%%
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
 autonumber
 participant W as W Relying Party
 participant I as I IdP
