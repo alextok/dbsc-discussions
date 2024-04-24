@@ -1,6 +1,6 @@
 # DBSC discussions
 
-Title: DBSC with attested Security Module
+## DBSC with attested Security Module
 
 ```mermaid
 sequenceDiagram
@@ -55,6 +55,10 @@ W->W: Validate JWT (w/public key on file)
 W->B: AuthCookie
 ````````
 
-#Open questions
+## Open questions
 
-#Meeting notes
+Opened question here
+
+## Meeting notes
+
+Meeting notes here
