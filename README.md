@@ -106,8 +106,6 @@ W->>B: AuthCookie
     ````````
 1. Step 18 above, should it go LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID? 
 
-1. Key container Id can be exposed to RP, we need to have always random, to satisfy privacy concerns, prevent tracking.
-
 1. Do we need this step, if we planned to use KeyContainerId?
     ```mermaid
     sequenceDiagram
