@@ -144,7 +144,7 @@ _\<adding notes here\>_
 
 ### 4/23/2024
 
-We discussed properties of the PublicKey Cert/Binding statement from the step 13 of the flow diagram above.
+We discussed properties of the PublicKey Cert/Binding statement from the step 13 of the flow diagram above .
 
 ```mermaid
 sequenceDiagram
