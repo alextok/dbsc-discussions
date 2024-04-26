@@ -104,7 +104,7 @@ W->>B: AuthCookie
     Note over W, B: Initiate DBSC ...
     W->>B: StartSession (challenge, tokens, _KeyContainerId_)
     ````````
-1. Step 18 above, should it go LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID? 
+1. Step 18 above, should it go to the LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID? 
 
 1. Do we need this step, if we planned to use KeyContainerId?
     ```mermaid
