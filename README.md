@@ -1,3 +1,4 @@
+# IdP calls 3P Local Key Helper
 ```mermaid
 sequenceDiagram
 %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
@@ -51,7 +52,81 @@ W->>W: Validate JWT (w/public key on file)
 W->>B: AuthCookie
 ````````
 
-## Opened topics
+# IdP calls 1P Local Key Helper
+## Device registration
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant D as D Device registration client
+participant I as I IdP
+ 
+Note over D, I: Provisioning ...
+D->>I: Register device (DeviceKey, AIK for KG, AIK for TPM, AIK for Software)
+I->>D: 200 OK
+````````
+
+## DBSC key chaining
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant W as W Relying Party
+participant I as I IdP
+participant B as B Browser
+participant P as P Local Key Helper
+ 
+Note over W, P: Sign in...
+W->>B: Start sign in (302)
+
+B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce}<br/>...
+
+opt nonce is stale
+I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
+B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce}<br/>...
+end
+
+I->>B: Sec-Session-GenerateKey ..., RP, HelperId
+B->>B: Evaluate policy for (RP, IdP, HelperId)<br/> - RP can be '*' in policies
+B->>P: Pre-gen key and attest
+ 
+P->>P: Generate Key
+ 
+P->>P: Get Key Attestation (publicKey, AIK)
+P->>B: Return PubKey Certificate
+B->>B: Remember this key is for RP (and maybe path)
+B->>I: PubKey Cert/Binding statement
+
+opt SSO information is not sufficient 
+I->>B: Sign in ceremony
+B->>I: Sign done
+end
+ 
+I->>B: Auth tokens
+B->>W: Auth tokens
+ 
+Note over W, P: Initiate DBSC ...
+W->>B: StartSession (challenge, tokens)
+B->>P: Request Sign JWT (uri, challenge, tokens?)
+P->>B: Return JWT Signature
+B->>W: POST /securesession/startsession (JWT, tokens)
+W->>W: Validate JWT, <br/>(w/ match to tokens)
+W->>B: AuthCookie
+
+Note over W, P: Refresh DBSC...
+B->>W: GET /securesession/refresh (sessionID)
+W->>B: Challenge
+B->>P: Request Sign JWT (sessionID)
+P->>B: Return JWT Signature
+B->>W: GET /securesession/refresh (JWT)
+W->>W: Validate JWT (w/public key on file)
+W->>B: AuthCookie
+````````
+
+
+# Opened topics
+1.  Sec-Session-GenerateKey is an extra roundtrip in 1st party diagram that is not required.
 1. Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
 1. Can any IDP call any local Local Key helper?
 1. How the local key helper is deployed? Concrete details?
@@ -129,20 +204,20 @@ W->>B: AuthCookie
 
 1. We should discuss provisioning flows too in more details
 
-## Closed topics
+# Closed topics
 - Existance of the local key helper.
 - Local key helper can be a 3P software.
 - PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
 - The protocol between LocalKey helper and Attestation service doesn't need to be documented as part of the public spec, it can stay internal.
 - Attestation service may not exist.
 
-## Meeting notes
+# Meeting notes
 
-### 4/30/2024
+## 4/30/2024
 
 _\<adding notes here\>_
 
-### 4/23/2024
+## 4/23/2024
 
 We discussed properties of the PublicKey Cert/Binding statement from the step 13 of the flow diagram above.
 
