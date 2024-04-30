@@ -93,10 +93,13 @@ B->>P: Pre-gen key and attest
  
 P->>P: Generate Key
  
-P->>P: Get Key Attestation (publicKey, AIK)
-P->>B: Return PubKey Certificate
+loop For each device
+P->>P: create binding statement S(publicKey, AIK)
+end
+
+P->>B: Return array of binding statements
 B->>B: Remember this key is for RP (and maybe path)
-B->>I: PubKey Cert/Binding statement
+B->>I: Return array of binding statements
 
 opt SSO information is not sufficient 
 I->>B: Sign in ceremony
