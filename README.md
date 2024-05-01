@@ -128,8 +128,8 @@ W->>B: AuthCookie
 ````````
 
 
-# Opened topics
-1.  Sec-Session-GenerateKey is an extra roundtrip in 1st party diagram that is not required.
+# Open topics
+1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 1. Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
 1. Can any IDP call any local Local Key helper?
 1. How the local key helper is deployed? Concrete details?
