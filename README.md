@@ -129,7 +129,10 @@ W->>B: AuthCookie
 
 
 # Open topics
-1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required. [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
+1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
+
+    [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
+    
 1. Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
 1. Can any IDP call any local Local Key helper?
 1. How the local key helper is deployed? Concrete details?
@@ -182,9 +185,14 @@ W->>B: AuthCookie
     Note over W, B: Initiate DBSC ...
     W->>B: StartSession (challenge, tokens, _KeyContainerId_)
     ````````
-1. Step 18 above, should it go to the LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID? [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
+1. Step 18 above, should it go to the LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID?
 
-1. Do we need this step, if we planned to use KeyContainerId? [Olga] Maybe we can use this step to optimize second time invocation?
+   [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
+
+1. Do we need this step, if we planned to use KeyContainerId?
+
+   [Olga] Maybe we can use this step to optimize second time invocation?
+
     ```mermaid
     sequenceDiagram
     %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
