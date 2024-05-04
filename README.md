@@ -134,7 +134,7 @@ W->>B: AuthCookie
     [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
     
 1. Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
-1. Can any IDP call any local Local Key helper?
+1. Can any IDP call any local Local Key helper? Should IDP provider a list of key helper ids, not just one?
 1. How the local key helper is deployed? Concrete details?
 1. Special/trusted by default Local Key helpers (Part of OS or Browser).
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
