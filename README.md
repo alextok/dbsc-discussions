@@ -215,6 +215,8 @@ W->>B: AuthCookie
 
 1. We should discuss provisioning flows too in more details
 
+1. Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp)
+
 # Closed topics
 - Existance of the local key helper.
 - Local key helper can be a 3P software.
