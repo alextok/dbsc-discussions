@@ -17,26 +17,27 @@ Note over W, A: Sign in...
 W->>B: Start sign in (302)
 B->>I: Load sign-in (follow the 302)
  
-I->>B: Sec-Session-GenerateKey ..., RP, HelperId
-B->>B: Evaluate policy for (RP, IdP, HelperId)<br/> - RP can be '*' in policies
-B->>P: Pre-gen key and attest
+I->>B: Sec-Session-GenerateKey ..., RP, [HelperId1, HelperId2,...], nonce, extraParams...
+B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2,...])
+B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
  
 P->>P: Generate Key
  
-P->>A: Get Key Attestation (publicKey, AIK)
-A->>B: Return PubKey Certificate
+P->>A: Get Binding Statement (publicKey, AIK, nonce)
+A->>P: Return binding statement { nonce, extraClaims... }
+P->>B: Return binding statement { nonce, extraClaims... }
 B->>B: Remember this key is for RP (and maybe path)
-B->>I: PubKey Cert/Binding statement
+B->>I: KeyId, Binding statement { nonce, extraClaims... }
  
 I->>B: Sign in ceremony
 B->>I: Sign done
  
-I->>B: Auth tokens
-B->>W: Auth tokens
+I->>B: Auth tokens, KeyId
+B->>W: Auth tokens, KeyId
  
 Note over W, A: Initiate DBSC ...
-W->>B: StartSession (challenge, tokens)
-B->>P: Request Sign JWT (uri, challenge, tokens?)
+W->>B: StartSession (challenge, tokens, KeyId)
+B->>P: Request Sign JWT (uri, challenge, tokens?, keyId?)
 P->>B: Return JWT Signature
 B->>W: POST /securesession/startsession (JWT, tokens)
 W->>W: Validate JWT, <br/>(w/ match to tokens)
@@ -129,6 +130,12 @@ W->>B: AuthCookie
 
 
 # Open topics
+1. Discuss refresh session doing inline with workload requests.
+
+1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization.
+
+1. Start session optimization for DBSC (Olga will schedule internal disscussion on this, MS will try to come up with diagram.)
+
 1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
     [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
@@ -138,21 +145,13 @@ W->>B: AuthCookie
 1. How the local key helper is deployed? Concrete details?
 1. Special/trusted by default Local Key helpers (Part of OS or Browser).
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
+1. Document that IDP must have a policy to enforce Binding key chaining to the same device.
 1. Format of the public key cert/binding statement, and claims it contains.
 
     1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
     
     1. For the sign-in ceremony, after key generation happens, we should discuss how exactly we will deliver pubblic key cert/binding statements and whether it should be a header format. For example, step "Sec-Session-GenerateKey ..., RP , HelperId" is included in a header in a 302 response from IDP, does browser attach Pubkey/Attestation information as a header before executing on a 302?
 
-1. Shold we remove RP from this leg? Do we beleive it is really useful?
-    ```mermaid
-    sequenceDiagram
-    %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-    autonumber 7
-    participant B as B Browser
-    
-    B->>B: Evaluate policy for (RP, IdP, HelperId)<br/> - RP can be '*' in policies
-    ````````
 1. We need to clarify params for this call:
     ```mermaid
     sequenceDiagram
@@ -164,7 +163,11 @@ W->>B: AuthCookie
     B->>P: Pre-gen key and attest (params?)
     
     ````````
-1. We planned to use KeyContainerId here (Windows only):
+1. We planned to use KeyContainerId here (Windows only): 
+
+    Decision:  We send KeyId, and browser remebers set of key for RP. 
+
+
     ```mermaid
     sequenceDiagram
     %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
@@ -185,9 +188,15 @@ W->>B: AuthCookie
     Note over W, B: Initiate DBSC ...
     W->>B: StartSession (challenge, tokens, _KeyContainerId_)
     ````````
-1. Step 18 above, should it go to the LocalKey helper for signature? If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? Should it be by IDP URL or helperID?
 
-   [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
+1. Will browser rember which KeyId belong to which LocalKey helper? (-yes, browser will rember which keyId) 
+
+1. Local key helper needs API for key deletion, for cookie cleanup? - yes, we need api for deletion of the keys. 
+    * we can think about TTL for keys.
+
+1. We need to capture, if key doesn't match to auth cookie, the app must retstart the flow.
+
+1. Step 18 above, should it go to the LocalKey helper for signature? (-yes) If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? (-KeyId will identify key helper) 
 
 1. Do we need this step, if we planned to use KeyContainerId?
 
@@ -216,6 +225,7 @@ W->>B: AuthCookie
 1. We should discuss provisioning flows too in more details
 
 # Closed topics
+- If and app generates keys for itself, then in scope of this document IDP == RP.
 - Existance of the local key helper.
 - Local key helper can be a 3P software.
 - PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
@@ -224,9 +234,20 @@ W->>B: AuthCookie
 
 # Meeting notes
 
-## 4/30/2024
+## 5/22/2024
 
-_\<adding notes here\>_
+Discussed feedback regarding the general performance of DBSC. MS internally discussed and received feedback from other application developers that while DBSC is performant enough during active usage, it is not performant enough when the device/web app hasn't been used for a while.
+
+Problem #1: The client has to wait for a network call to complete from the session refresh endpoint before workload navigation can happen. We can solve this problem by including a special header in the request with refresh session information. There are possible alternative approaches for this, which need to be discussed separately.
+
+Problem #2: The nonce is not fresh on the client. We discussed multiple approaches:
+1. Having a browser service to talk to some critical RPs to pre-fetch the nonce.
+2. Allowing nonce pre-fetching by the local key helper.
+
+We've decided to open GitHub issues for abvoe problems.
+
+There is also feedback on performance of StartSession, MS is working on alternative internally (Olga is driving it).
+
 
 ## 4/23/2024
 
