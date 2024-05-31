@@ -171,8 +171,8 @@ I->>B: Sign in ceremony
 B->>I: Sign done
 end
 
-I->>B: Authorization code, KeyId
-Note over W, I: Sec-Session-RedirectURI matches, initialize DBSC
+I->>B: Authorization code, Sec-Session-KeyId
+Note over W, I: Sec-Session-RedirectURI matches 302 Location prefix and Sec-Session-KeyId is present in response, initialize DBSC
 B->>P: Request Sign JWT (uri, Sec-Session-Challenge, Sec-Session-ExtraParams)
 P->>B: Return JWT Signature
 B->>W: Authorization code, KeyId, JWT
