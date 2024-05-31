@@ -131,7 +131,7 @@ W->>W: Validate JWT (w/public key on file)
 W->>B: AuthCookie
 ```
 
-## DBSC key chaining (with perf optimization, confidential client)
+## DBSC key chaining (with perf optimization 1 for session start, confidential client)
 
 ```mermaid
 sequenceDiagram
@@ -165,6 +165,68 @@ end
 P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
 B->>B: Remember this key is for RP (and maybe path)
 B->>I: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+
+opt SSO information is not sufficient
+I->>B: Sign in ceremony
+B->>I: Sign done
+end
+
+I->>B: Authorization code, Sec-Session-KeyId
+Note over W, B: Sec-Session-RedirectURI matches 302 Location prefix and Sec-Session-KeyId is present in response, initialize DBSC for RP
+B->>P: Request Sign JWT (uri, Sec-Session-Challenge, Sec-Session-ExtraParams)
+P->>B: Return JWT Signature
+Note over W, B: JWT is appended by the browser before returning the response from IDP back to the RP
+B->>W: Authorization code, KeyId, JWT
+W->>I: (confidential client request) redeem authorization code
+I->>W: (confidential client response) return id_token
+W->>W: parse id_token and validate binding, validate JWT from previous steps
+W->>B: Bound AuthCookie
+
+Note over W, P: Refresh DBSC...
+B->>W: GET /securesession/refresh (sessionID)
+W->>B: Challenge, **extraParams**
+B->>P: Request Sign JWT (sessionID, **extraParams**)
+P->>B: Return JWT Signature
+B->>W: GET /securesession/refresh (JWT)
+W->>W: Validate JWT (w/public key on file)
+W->>B: AuthCookie
+```
+
+## DBSC key chaining (with perf optimization 1 and 2 for session start and key generation, confidential client)
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant W as W Relying Party
+participant I as I IdP
+participant B as B Browser
+participant P as P Local Key Helper
+
+Note over W, P: Sign in...
+W->>B: Start sign in (302) + query parameters Sec-Session-Challenge=RPNonce, Sec-Session-RedirectURI=RPRedirectForBrowserToListenTo, Sec-Session-ExtraParams=... + query param Sec-Session-HelperId=XX
+
+B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...
+
+opt nonce is stale
+I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
+B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...
+end
+
+Note over B: If Sec-Session-HelperId is present and helperId policy matches IDP URL that RP redirects to, initiate this flow
+B-->B: initiate Key generation
+
+B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
+ 
+P->>P: Generate Key
+
+loop For each device
+P->>P: create binding statement S(publicKey, AIK)
+end
+
+P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+B->>B: Remember this key is for RP (and maybe path)
+B->>I: Attach to the request: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
 
 opt SSO information is not sufficient
 I->>B: Sign in ceremony
