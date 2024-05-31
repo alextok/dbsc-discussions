@@ -179,7 +179,7 @@ Note over W, B: JWT is appended by the browser before returning the response fro
 B->>W: Authorization code, KeyId, JWT
 W->>I: (confidential client request) redeem authorization code
 I->>W: (confidential client response) return id_token
-W->>W: parse id_token and validate binding, validate JWT from previous steps
+W->>W: parse id_token and validate binding, match with the JWT from the previous
 W->>B: Bound AuthCookie
 
 Note over W, P: Refresh DBSC...
@@ -241,7 +241,7 @@ Note over W, B: JWT is appended by the browser before returning the response fro
 B->>W: Authorization code, KeyId, JWT
 W->>I: (confidential client request) redeem authorization code
 I->>W: (confidential client response) return id_token
-W->>W: parse id_token and validate binding, validate JWT from previous steps
+W->>W: parse id_token and validate binding, match with JWT from the previous step
 W->>B: Bound AuthCookie
 
 Note over W, P: Refresh DBSC...
