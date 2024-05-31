@@ -213,7 +213,7 @@ I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
 B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...
 end
 
-Note over B: If Sec-Session-HelperId is present and helperId policy matches IDP URL that RP redirects to, initiate this flow
+Note over B: If Sec-Session-HelperId is present and helperId policy matches IDP URL that RP redirects to, initiate this flow. This can be optional for RP that wants to optimize. 
 B-->B: initiate Key generation
 
 B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
