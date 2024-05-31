@@ -172,9 +172,10 @@ B->>I: Sign done
 end
 
 I->>B: Authorization code, Sec-Session-KeyId
-Note over W, I, B: Sec-Session-RedirectURI matches 302 Location prefix and Sec-Session-KeyId is present in response, initialize DBSC for RP
+Note over W, B: Sec-Session-RedirectURI matches 302 Location prefix and Sec-Session-KeyId is present in response, initialize DBSC for RP
 B->>P: Request Sign JWT (uri, Sec-Session-Challenge, Sec-Session-ExtraParams)
 P->>B: Return JWT Signature
+Note over W, B: JWT is appended by the browser before returning the response from IDP back to the RP
 B->>W: Authorization code, KeyId, JWT
 W->>I: (confidential client request) redeem authorization code
 I->>W: (confidential client response) return id_token
