@@ -190,7 +190,7 @@ W->>B: Bound AuthCookie
 Note over W, P: Refresh DBSC...
 B->>W: GET /securesession/refresh (sessionID)
 W->>B: Challenge, **extraParams**
-B->>P: Request Sign JWT (sessionID, **extraParams**)
+B->>P: Request Sign JWT (sessionID, Sec-Session-Challenge, **extraParams**)
 P->>B: Return JWT Signature
 B->>W: GET /securesession/refresh (JWT)
 W->>W: Validate JWT (w/public key on file)
