@@ -179,7 +179,7 @@ end
 
 I->>B: Authorization code, Sec-Session-KeyId
 Note over W, B: Since DBSC session has been initialized already for RP, browser needs to generate JWT on redirect back
-B->>P: Request Sign JWT (uri, RPChallenge, extraParams)
+B->>P: Request Sign JWT (path, RPChallenge, extraParams)
 P->>B: Return JWT Signature
 Note over W, B: JWT is appended by the browser before returning the response from IDP back to the RP
 B->>W: Authorization code, KeyId, JWT
