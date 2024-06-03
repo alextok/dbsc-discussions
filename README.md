@@ -143,7 +143,7 @@ participant B as B Browser
 participant P as P Local Key Helper
 
 Note over W, P: Sign in...
-W->>B: Start sign in (302)<br/>Sec-Session-Challenge: RPChallenge <br/>Sec-Session-IDP: IDPURL <br/>Sec-Session-GenerateKey: RPURL, IDPURL
+W->>B: Start sign in (302)<br/>Sec-Session-Registration: path, RPChallenge,... <br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
 
 B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...
 
@@ -155,7 +155,7 @@ end
 B->>B: Check for cached HelperId for IDPURL
 
 opt No cached HelperId present
-I->>B: Sec-Session-HelperIdList: [{HelperId1, CacheTime2}, {HelperId2, CacheTime2}], extraParams...
+I->>B: Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
 Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
 B->>B: Cache HelperId for IDPURL for CacheTime
