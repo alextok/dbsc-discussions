@@ -156,6 +156,7 @@ B->>B: Check for cached HelperId for IDPURL
 
 opt No cached HelperId present
 I->>B: Sec-Session-HelperIdList: [{HelperId1, CacheTime2}, {HelperId2, CacheTime2}], extraParams...
+Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
 B->>B: Cache HelperId for IDPURL for CacheTime
 end
