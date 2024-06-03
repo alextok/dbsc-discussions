@@ -158,9 +158,9 @@ opt No cached HelperId present
 I->>B: Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
 Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
-B->>B: Cache HelperId for IDPURL for CacheTime
+B->>B: Cache HelperId for IDPURL for HelperCacheTime
 end
-B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
+B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
  
 P->>P: Generate Key
 
