@@ -1,4 +1,4 @@
-# IdP calls 3P Local Key Helper
+# IdP calls a public Local Key Helper
 
 ```mermaid
 sequenceDiagram
@@ -18,7 +18,7 @@ Note over W, A: Sign in...
 W->>B: Start sign in (302)
 B->>I: Load sign-in (follow the 302)
  
-I->>B: Sec-Session-GenerateKey ..., RP, [HelperId1, HelperId2,...], nonce, extraParams...
+I->>B: Sec-Session-GenerateKey: RPUrl, [HelperId1, HelperId2,...], nonce, extraParams...
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2,...])
 B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
  
@@ -54,7 +54,7 @@ W->>W: Validate JWT (w/public key on file)
 W->>B: AuthCookie
 ```
 
-# IdP calls 1P Local Key Helper
+# IdP calls a private Local Key Helper
 
 ## Device registration
 
@@ -186,24 +186,25 @@ W->>B: AuthCookie
 # Closed topics
 
 1. Can any IDP call any local Local Key helper? Should IDP provider a list of key helper ids, not just one?
-1. Will browser rember which KeyId belong to which LocalKey helper? (-yes, browser will rember which keyId) 
 
 1. Document that IDP must have a policy to enforce Binding key chaining to the same device.
 
 1. We need to capture, if key doesn't match to auth cookie, the app must retstart the flow.
 
-1. PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
-
 1. Step 18 above, should it go to the LocalKey helper for signature? (-yes) If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? (-KeyId will identify key helper) 
 
     [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
 
-1. [Doc] The protocol between LocalKey helper and Attestation service doesn't need to be documented as part of the public spec, it can stay internal.
-1. [Doc] Attestation service may not exist.
-1. [Doc] If and app generates keys for itself, then in scope of this document IDP == RP.
-1. [Doc] Existance of the local key helper.
-1. [Doc] Local key helper can be a 3P software.
-1. [Doc] We need to clarify params for this call:
+1. [Documented] PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
+
+1. [Documented] Will browser rember which KeyId belong to which LocalKey helper? (-yes, browser will rember which keyId) 
+
+1. [Documented] The protocol between LocalKey helper and Attestation service doesn't need to be documented as part of the public spec, it can stay internal.
+1. [Documented] Attestation service may not exist.
+1. [Documented] If and app generates keys for itself, then in scope of this document IDP == RP.
+1. [Documented] Existance of the local key helper.
+1. [Documented] Local key helper can be a 3P software.
+1. [Documented] We need to clarify params for this call:
     ```mermaid
     sequenceDiagram
     %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
@@ -214,7 +215,7 @@ W->>B: AuthCookie
     B->>P: Pre-gen key and attest (params?)
     ````````
     
-1. [Doc] We planned to use KeyContainerId here (Windows only): 
+1. [Documented] We planned to use KeyContainerId here (Windows only): 
 
     Decision:  We send KeyId, and browser remebers set of key for RP. 
 
@@ -239,9 +240,9 @@ W->>B: AuthCookie
     Note over W, B: Initiate DBSC ...
     W->>B: StartSession (challenge, tokens, _KeyContainerId_)
     ````````
-1. [Doc] Local key helper needs API for key deletion, for cookie cleanup? - yes, we need api for deletion of the keys. 
+1. [Documented] Local key helper needs API for key deletion, for cookie cleanup? - yes, we need api for deletion of the keys. 
     * we can think about TTL for keys.
-1. [Doc] Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
+1. [Documented] Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
 
 
 # Description (Draft)
@@ -276,7 +277,7 @@ One device registration client can manager multiple devices on the same phisical
 
 For the scope of this document, the local key helper is a software component of the device registration client. It serves as an interface responsible for DBSC key management.
 
-The local key helper can be either public or private. A public local key helper can be accessed by any identity provider (IDP), while a private local key helper serves needs of a specific IDP.
+The Local Key Helper can be either public or private. A public Local Key Helper can be accessed by any Identity Provider (IdP), while a private Local Key Helper serves the needs of a specific IdP. The private Local Key Helper is usually owned by the IdP and uses a private protocol, while the public Local Key Helper is owned by a provider different from the IdP, with a well-defined communication protocol.
 
 The local key helper is responsible for:
 
@@ -288,7 +289,9 @@ The local key helper is responsible for:
 
 A _binding key_ is an asymmetric key pair that is used to bind an auth cookie. This key is also defined in the DBSC original spec. The thumbprint of the key is stored in the session or auth cookies, depending on the implementation. It is expected that the binding key is created in a secure enclave on the original device. However, the original DBSC proposal doesn't allow to validate, as the binding key can be created on an attacker-controlled device.
 
-The local key helper produces a _binding statement_, a statement that asserts the binding key was generated on the same device as the device key. Details on how this statement is issued are out of scope for this document, but the key building block we plan to use for this is the _attestation key_ (see below).
+The binding key is identified by a key ID. It is the responsibility of the browser to remember which key ID corresponds to which Local Key Helper and to use it for DBSC signatures and key management.
+
+Additonally to the binding key, the local key helper produces a _binding statement_, a statement that asserts the binding key was generated on the same device as the device key. Details on how this statement is issued are out of scope for this document, but the key building block we plan to use for this is the _attestation key_ (see below).
 
 The attestation key has the following properties:
 
@@ -299,9 +302,13 @@ The attestation key can be uploaded only once to the backend at the moment of de
 
 Please note that this is not the only way to ensure that the binding key and the device key belong to the same device, and having the attestation key and the attestation service is not mandatory for producing a binding statement. That is why the protocol specifics of checking the binding are out of scope for this document. Here, we focus only on the important properties of the binding statement.
 
-The Local key helper can produce multiple binding statements (for multiple devices)
+The Local Key Helper is an integral component of the Device Registration Client. A single Device Registration Client can support the identities of multiple devices. Furthermore, the device may be unknown at the moment of authentication. Consequently, multiple binding statements can be issued for a single binding key. This is an especially true for the private local key helpers.
 
-Binding statements can be long-lived or short lived. 
+Binding statements can be long-lived or short-lived. If an IdP can perform proof of device, it can use long-lived binding statements based on attestation keys to avoid extra network calls. IdPs that do not perform proof of possession of the device, the ones that use public local key helpers, must use short-lived binding statements to prevent forgery of the binding statement from a different device. To avoid binding statement forgery, a short-lived binding statement must have an embedded nonce sent by the IdP to validate that it is a fresh binding statement.
+
+### Signing DBSC requests
+
+The binding key can be created with special security restrictions or extra properties. The Local Key Helper is responsible for producing the signatures needed for DBSC functioning. 
 
 ### Cleanup of the binding keys and their artifacts
 
@@ -312,7 +319,8 @@ The cleanup can occur:
 * On demand, when the user decides to clear browser cookies
 * Automatically, when a key hasn't been used for a long time (N days) to keep the OS healthy
 
-## Attestation key and binding statement
+## End to end flow
+
 
 # Meeting notes
 
