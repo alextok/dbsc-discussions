@@ -179,7 +179,7 @@ end
 
 I->>B: Authorization code, Sec-Session-KeyId
 Note over W, B: Since DBSC session has been initialized already for RP, browser needs to generate JWT on redirect back
-B->>P: Request Sign JWT (uri, Sec-Session-Challenge, Sec-Session-ExtraParams)
+B->>P: Request Sign JWT (uri, RPChallenge, extraParams)
 P->>B: Return JWT Signature
 Note over W, B: JWT is appended by the browser before returning the response from IDP back to the RP
 B->>W: Authorization code, KeyId, JWT
@@ -191,7 +191,7 @@ W->>B: Bound AuthCookie
 Note over W, P: Refresh DBSC...
 B->>W: GET /securesession/refresh (sessionID)
 W->>B: Challenge, **extraParams**
-B->>P: Request Sign JWT (sessionID, Sec-Session-Challenge, **extraParams**)
+B->>P: Request Sign JWT (sessionID, RPChallenge, **extraParams**)
 P->>B: Return JWT Signature
 B->>W: GET /securesession/refresh (JWT)
 W->>W: Validate JWT (w/public key on file)
