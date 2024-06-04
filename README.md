@@ -166,17 +166,17 @@ alt Cached HelperId present (99.99% cases)
     P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
     B->>B: Remember this key is for RP (and maybe path)
 
-    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
 
     opt nonce is stale
         I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
-        B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+        B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
     end
 
 else No cached HelperId present
 
 
-    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-HelperDiscoveryNeeded: RPURL, IDPURL, extraParams
 
     Note over I, B: No binding info present, but the reequest has GenerratKey, so IdP issues helper id list
 
@@ -195,7 +195,7 @@ else No cached HelperId present
     P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
     B->>B: Remember this key is for RP (and maybe path)
 
-    B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
 
 
 end
