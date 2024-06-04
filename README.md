@@ -142,24 +142,20 @@ participant I as I IdP
 participant B as B Browser
 participant P as P Local Key Helper
 
+Note over W, P: IdP life...
+B->>I: Any request
+Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
+I->>B: Any response<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+B->>B: Cache HelperId for IDPURL for HelperCacheTime
+
 Note over W, P: Sign in...
 W->>B: Start sign in (302)<br/>Sec-Session-Registration: path, RPChallenge,... <br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
-
-B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...
-
-opt nonce is stale
-I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
-B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...
-end
-
 B->>B: Check for cached HelperId for IDPURL
 
-opt No cached HelperId present
-I->>B: Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
-Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
-B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
-B->>B: Cache HelperId for IDPURL for HelperCacheTime
-end
+alt Cached HelperId present (99.99% cases)
+
+B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2...])
+
 B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
  
 P->>P: Generate Key
@@ -170,14 +166,49 @@ end
 
 P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
 B->>B: Remember this key is for RP (and maybe path)
-B->>I: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+
+B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+
+opt nonce is stale
+I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+end
+
+else No cached HelperId present
+
+
+B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+
+Note over I, B: No binding info present, but reequest has GenerratKey, so issue helper id list
+
+I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+B->>B: Cache HelperId for IDPURL for HelperCacheTime
+
+B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
+B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
+ 
+P->>P: Generate Key
+
+loop For each device
+P->>P: create binding statement S(publicKey, AIK)
+end
+
+P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+B->>B: Remember this key is for RP (and maybe path)
+
+B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+
+
+end
 
 opt SSO information is not sufficient
 I->>B: Sign in ceremony
 B->>I: Sign done
 end
 
-I->>B: Authorization code, Sec-Session-KeyId
+I->>B: Authorization code, KeyId
+
+
 Note over W, B: Since DBSC session has been initialized already for RP, browser needs to generate JWT on redirect back
 B->>P: Request Sign JWT (path, RPChallenge, extraParams)
 P->>B: Return JWT Signature
