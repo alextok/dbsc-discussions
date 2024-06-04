@@ -144,7 +144,6 @@ participant P as P Local Key Helper
 
 Note over W, P: IdP life...
 B->>I: Any request
-Note over I, B: Sec-Session-HelperIdList can be returned on any IDP response
 I->>B: Any response<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
 B->>B: Cache HelperId for IDPURL for HelperCacheTime
 
