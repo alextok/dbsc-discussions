@@ -131,6 +131,103 @@ W->>W: Validate JWT (w/public key on file)
 W->>B: AuthCookie
 ```
 
+## DBSC key chaining (with perf optimization, confidential client)
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant W as W Relying Party
+participant I as I IdP
+participant B as B Browser
+participant P as P Local Key Helper
+
+Note over W, P: IdP life...
+B->>I: Any request
+I->>B: Any response<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+B->>B: Cache HelperId for IDPURL for HelperCacheTime
+
+Note over W, P: Sign in...
+W->>B: Start sign in (302)<br/>Sec-Session-Registration: path, RPChallenge,... <br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+B->>B: Check for cached HelperId for IDPURL
+
+alt Cached HelperId present (99.99% cases)
+
+    B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2...])
+
+    B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
+    
+    P->>P: Generate Key
+
+    loop For each device
+        P->>P: create binding statement S(publicKey, AIK)
+    end
+
+    P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+    B->>B: Remember this key is for RP (and maybe path)
+
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+
+    opt nonce is stale
+        I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+        B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+    end
+
+else No cached HelperId present
+
+
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-HelperDiscoveryNeeded: RPURL, IDPURL, extraParams
+
+    Note over I, B: No binding info present, but the reequest has GenerratKey, so IdP issues helper id list
+
+    I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+    B->>B: Cache HelperId for IDPURL for HelperCacheTime
+
+    B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
+    B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
+    
+    P->>P: Generate Key
+
+    loop For each device
+        P->>P: create binding statement S(publicKey, AIK)
+    end
+
+    P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+    B->>B: Remember this key is for RP (and maybe path)
+
+    B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+
+
+end
+
+opt SSO information is not sufficient
+    I->>B: Sign in ceremony
+    B->>I: Sign done
+end
+
+I->>B: Authorization code, KeyId
+
+
+Note over W, B: Since DBSC session has been initialized already for RP, browser needs to generate JWT on redirect back
+B->>P: Request Sign JWT (path, RPChallenge, extraParams)
+P->>B: Return JWT Signature
+Note over W, B: JWT is appended by the browser before returning the response from IDP back to the RP
+B->>W: Authorization code, KeyId, JWT
+W->>I: (confidential client request) redeem authorization code
+I->>W: (confidential client response) return id_token
+W->>W: parse id_token and validate binding, match with the JWT from the previous
+W->>B: Bound AuthCookie
+
+Note over W, P: Refresh DBSC...
+B->>W: GET /securesession/refresh (sessionID)
+W->>B: Challenge, **extraParams**
+B->>P: Request Sign JWT (sessionID, RPChallenge, **extraParams**)
+P->>B: Return JWT Signature
+B->>W: GET /securesession/refresh (JWT)
+W->>W: Validate JWT (w/public key on file)
+W->>B: AuthCookie
+```
+
 # Open topics
 
 1. Discuss refresh session doing inline with workload requests.
