@@ -154,56 +154,56 @@ B->>B: Check for cached HelperId for IDPURL
 
 alt Cached HelperId present (99.99% cases)
 
-B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2...])
+    B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2...])
 
-B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
- 
-P->>P: Generate Key
+    B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
+    
+    P->>P: Generate Key
 
-loop For each device
-P->>P: create binding statement S(publicKey, AIK)
-end
+    loop For each device
+        P->>P: create binding statement S(publicKey, AIK)
+    end
 
-P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
-B->>B: Remember this key is for RP (and maybe path)
+    P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+    B->>B: Remember this key is for RP (and maybe path)
 
-B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
 
-opt nonce is stale
-I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
-B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
-end
+    opt nonce is stale
+        I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+        B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...<br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    end
 
 else No cached HelperId present
 
 
-B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ... <br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
 
-Note over I, B: No binding info present, but reequest has GenerratKey, so issue helper id list
+    Note over I, B: No binding info present, but the reequest has GenerratKey, so IdP issues helper id list
 
-I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
-B->>B: Cache HelperId for IDPURL for HelperCacheTime
+    I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce<br/><br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+    B->>B: Cache HelperId for IDPURL for HelperCacheTime
 
-B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
-B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
- 
-P->>P: Generate Key
+    B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
+    B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
+    
+    P->>P: Generate Key
 
-loop For each device
-P->>P: create binding statement S(publicKey, AIK)
-end
+    loop For each device
+        P->>P: create binding statement S(publicKey, AIK)
+    end
 
-P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
-B->>B: Remember this key is for RP (and maybe path)
+    P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+    B->>B: Remember this key is for RP (and maybe path)
 
-B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
+    B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ... <br/><br/>Sec-Session-BindingInfo: KeyId, PublicKey, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]<br/>Sec-Session-GenerateKey: RPURL, IDPURL, extraParams
 
 
 end
 
 opt SSO information is not sufficient
-I->>B: Sign in ceremony
-B->>I: Sign done
+    I->>B: Sign in ceremony
+    B->>I: Sign done
 end
 
 I->>B: Authorization code, KeyId
