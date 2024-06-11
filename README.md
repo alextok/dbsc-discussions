@@ -230,25 +230,36 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. Can we open this meeting?
+
+1. Engage Android to this meeting or create another one to be able to implement on android and later iOS.
+
 1. Discuss refresh session doing inline with workload requests.     
     
     Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
 
-1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
-
-    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/61
+     Kristian: to resolve on this till 06/18.
 
 1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp) - Olga is owner.
 
-    Diagram is update see above.
-
+    Diagram is updated see above.
+    
+    Sasha/Olga should try to document in the draft below.
+   
 1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
     [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
 
 1. How the local key helper is deployed? Concrete details?
+
+    Sasha to write an original proposal for deployment.
+
 1. Special/trusted by default Local Key helpers (Part of OS or Browser).
+
+    Sasha to write an original proposal for special local key helpers.
+
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
+
 1. Format of the public key cert/binding statement, and claims it contains.
 
     1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
@@ -286,6 +297,12 @@ W->>B: AuthCookie
 
 
 # Closed topics
+
+1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
+
+    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/61
+
+    Decision: It is repsonsobility of the local key helper.
 
 1. Can any IDP call any local Local Key helper? Should IDP provider a list of key helper ids, not just one?
 
