@@ -230,12 +230,17 @@ W->>B: AuthCookie
 
 # Open topics
 
-1. Discuss refresh session doing inline with workload requests.
+1. Discuss refresh session doing inline with workload requests.     
+    
+    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
 
 1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
 
+    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/61
+
 1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp) - Olga is owner.
 
+    Diagram is update see above.
 
 1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
