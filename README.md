@@ -421,6 +421,14 @@ The cleanup can occur:
 
 # Meeting notes
 
+## 6/4/2024
+
+We discussed a new optimization scheme for token binding, which Google is currently evaluating.
+
+We also explored options and feedback for improving the refresh session performance. Two potential solutions were considered:
+1. At the moment of cookie expiration, append the binding payload to all requests sent to the RP/Service.
+2. Introduce a JavaScript API to address this issue.
+
 ## 5/22/2024
 
 Discussed feedback regarding the general performance of DBSC. MS internally discussed and received feedback from other application developers that while DBSC is performant enough during active usage, it is not performant enough when the device/web app hasn't been used for a while.
