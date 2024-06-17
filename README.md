@@ -70,67 +70,6 @@ D->>I: Register device (DeviceKey, AIK for KG, AIK for TPM, AIK for Software)
 I->>D: 200 OK
 ```
 
-## DBSC key chaining
-
-```mermaid
-sequenceDiagram
-%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-autonumber 1
-participant W as W Relying Party
-participant I as I IdP
-participant B as B Browser
-participant P as P Local Key Helper
-
-Note over W, P: Sign in...
-W->>B: Start sign in (302)
-
-B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...
-
-opt nonce is stale
-I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
-B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...
-end
-
-I->>B: Sec-Session-GenerateKey ..., RP, [HelperId1], extraParams...
-B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
-B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
- 
-P->>P: Generate Key
-
-loop For each device
-P->>P: create binding statement S(publicKey, AIK)
-end
-
-P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
-B->>B: Remember this key is for RP (and maybe path)
-B->>I: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
-
-opt SSO information is not sufficient
-I->>B: Sign in ceremony
-B->>I: Sign done
-end
-
-I->>B: Auth token, KeyId
-B->>W: Auth token, KeyId
-
-Note over W, P: Initiate DBSC ...
-W->>B: StartSession (challenge, token?, KeyId?, **extraParams**)
-B->>P: Request Sign JWT (uri, challenge, tokens?, **extraParams**)
-P->>B: Return JWT Signature
-B->>W: POST /securesession/startsession (JWT, token?)
-W->>W: Validate JWT, <br/>(w/ match to tokens)
-W->>B: AuthCookie
-
-Note over W, P: Refresh DBSC...
-B->>W: GET /securesession/refresh (sessionID)
-W->>B: Challenge, **extraParams**
-B->>P: Request Sign JWT (sessionID, **extraParams**)
-P->>B: Return JWT Signature
-B->>W: GET /securesession/refresh (JWT)
-W->>W: Validate JWT (w/public key on file)
-W->>B: AuthCookie
-```
-
 ## DBSC key chaining (with perf optimization, confidential client)
 
 ```mermaid
@@ -229,6 +168,10 @@ W->>B: AuthCookie
 ```
 
 # Open topics
+
+1. We need to pubblish this spec on DBSC publicly.
+    
+    Owners: Sameera & Kristian
 
 1. Can we open this meeting?
 
@@ -443,6 +386,22 @@ The cleanup can occur:
 
 # Meeting notes
 
+## 6/11/2024
+
+MS informed the group that GitHub issues were opened. We agreed that the nonce pre-fetch issue is the responsibility of the Local Key Helper.
+
+[Sameera/Sasha] Need to document this.
+
+**Optimized diagram.** Google had a chance to review the optimized diagram. Google was okay with the optimized key chaining diagram. We agreed to start documenting the optimized scheme as the current POR.
+
+Google also is ok that IDP can cache local key helper on any response.
+
+[Sameera/Sasha] Need to adjust [the public Local Key Helper diagram](#idp-calls-a-public-local-key-helper) and start the publishing process.
+
+[Sameera/Kristian] Should start to work on publshing this spec publicly on DBSC.
+
+**Session refresh optimization.** We dicussed optimization of the session refresh. We agreed that nonce prefetch/caching will be responsoblity of the local key helper. 
+
 ## 6/4/2024
 
 We discussed a new optimization scheme for token binding, which Google is currently evaluating.
@@ -515,3 +474,66 @@ Altentively we can think as Local Key helper is part of the device registation c
 - can be owned by 3P vendor (MS on iOS, Android)
 - can be owned by OS (MS on Windows, MAC)
 - can be owned by Browser (Google Chrome)
+
+# Cut for history
+
+## DBSC key chaining
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant W as W Relying Party
+participant I as I IdP
+participant B as B Browser
+participant P as P Local Key Helper
+
+Note over W, P: Sign in...
+W->>B: Start sign in (302)
+
+B->>I: Load sign-in (follow the 302)<br/><br/>x-ms-RefreshTokenCredential1{nonce}<br/>x-ms-DeviceCredential1{nonce}<br/> x-ms-RefreshTokenCredential2{nonce}<br/> x-ms-DeviceCredential2{nonce} ...
+
+opt nonce is stale
+I->>B: 302 to IdP with qs parameter sso_nonce=new_nonce
+B->>I: Load sign-in<br/><br/>x-ms-RefreshTokenCredential1{new_nonce}<br/>x-ms-DeviceCredential1{new_nonce}<br/> x-ms-RefreshTokenCredential2{new_nonce}<br/> x-ms-DeviceCredential2{new_nonce} ...
+end
+
+I->>B: Sec-Session-GenerateKey ..., RP, [HelperId1], extraParams...
+B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
+B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
+ 
+P->>P: Generate Key
+
+loop For each device
+P->>P: create binding statement S(publicKey, AIK)
+end
+
+P->>B: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+B->>B: Remember this key is for RP (and maybe path)
+B->>I: Return: KeyId, <br/>array of binding statements [BindingStatement1 {extraClaims....}, <br/>BindingStatement2 {extraCalims...}]
+
+opt SSO information is not sufficient
+I->>B: Sign in ceremony
+B->>I: Sign done
+end
+
+I->>B: Auth token, KeyId
+B->>W: Auth token, KeyId
+
+Note over W, P: Initiate DBSC ...
+W->>B: StartSession (challenge, token?, KeyId?, **extraParams**)
+B->>P: Request Sign JWT (uri, challenge, tokens?, **extraParams**)
+P->>B: Return JWT Signature
+B->>W: POST /securesession/startsession (JWT, token?)
+W->>W: Validate JWT, <br/>(w/ match to tokens)
+W->>B: AuthCookie
+
+Note over W, P: Refresh DBSC...
+B->>W: GET /securesession/refresh (sessionID)
+W->>B: Challenge, **extraParams**
+B->>P: Request Sign JWT (sessionID, **extraParams**)
+P->>B: Return JWT Signature
+B->>W: GET /securesession/refresh (JWT)
+W->>W: Validate JWT (w/public key on file)
+W->>B: AuthCookie
+```
