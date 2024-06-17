@@ -169,37 +169,35 @@ W->>B: AuthCookie
 
 # Open topics
 
-1. We need to pubblish this spec on DBSC publicly.
+1. We need to publish this spec on DBSC publicly, to get public feedback.
     
     Owners: Sameera & Kristian
 
-1. Can we open this meeting?
+1. Can we open this meeting for other industry leaders?
 
-1. Engage Android to this meeting or create another one to be able to implement on android and later iOS.
+    Owners: Sameera & Kristian.
+
+1. Coordinate a session to discuss the feasibility of implementing the protocol on Android, to be able to implement on android and later iOS.
+
+    Owners: Kristian.
 
 1. Discuss refresh session doing inline with workload requests.     
     
     Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
 
-     Kristian: to resolve on this till 06/18.
+    Owners: Kristian. to resolve on this till 06/18.
 
 1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp) - Olga is owner.
-
-    Diagram is updated see above.
-    
-    Sasha/Olga should try to document in the draft below.
    
-1.  Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
-
-    [Olga] Step 12 is where browser remembers the key for RP+IDP combo. Maybe we consider current flow first time invocation scenario and for subsequent calls, browser sees RP/IDP combo, or understands some sort of a header, and performs this operation automatically?
-
+    Owners: Sasha/Olga should try to document in the draft below.
+   
 1. How the local key helper is deployed? Concrete details?
 
-    Sasha to write an original proposal for deployment.
+    Owners: Sasha to write an original proposal for deployment.
 
 1. Special/trusted by default Local Key helpers (Part of OS or Browser).
 
-    Sasha to write an original proposal for special local key helpers.
+    Owners: Sasha to write an original proposal for special local key helpers.
 
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
 
@@ -256,6 +254,10 @@ W->>B: AuthCookie
 1. Step 18 above, should it go to the LocalKey helper for signature? (-yes) If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? (-KeyId will identify key helper) 
 
     [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
+
+1.  [Not applicable] Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
+
+    The new flow doesn't have this issue. Not applicable anymore.
 
 1. [Documented] PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
 
@@ -388,19 +390,36 @@ The cleanup can occur:
 
 ## 6/11/2024
 
-MS informed the group that GitHub issues were opened. We agreed that the nonce pre-fetch issue is the responsibility of the Local Key Helper.
+**Optimized diagram:** The team discussed the DBSC key chaining performance optimization with a focus on the start session. They agreed that the start session approach was acceptable and planned to document it. If any objections appear, we will discuss them accordingly.
 
-[Sameera/Sasha] Need to document this.
+The team agreed that caching IDP-specific helpers on any response from IDP should be acceptable.
 
-**Optimized diagram.** Google had a chance to review the optimized diagram. Google was okay with the optimized key chaining diagram. We agreed to start documenting the optimized scheme as the current POR.
+[Sameera/Sasha] Need to review [the public Local Key Helper diagram](#idp-calls-a-public-local-key-helper) to check if the new changes are needed.
 
-Google also is ok that IDP can cache local key helper on any response.
-
-[Sameera/Sasha] Need to adjust [the public Local Key Helper diagram](#idp-calls-a-public-local-key-helper) and start the publishing process.
+**Proposal for publishing on DBSC:** The team plans to draft a proposal for the key chaining to be published on the DBSC, aiming to gather feedback from third parties.
 
 [Sameera/Kristian] Should start to work on publshing this spec publicly on DBSC.
 
-**Session refresh optimization.** We dicussed optimization of the session refresh. We agreed that nonce prefetch/caching will be responsoblity of the local key helper. 
+**Concerns on Protocol Complexity:** The team expressed concerns about the complexity of creating a generic protocol, suggesting a need to review the overall architecture to ensure it remains manageable. 
+
+**Session refresh for inactive device optimization:** The team debated various approaches for handling refresh sessions, including using workload request and the potential use of a JavaScript API. MS informed the group that GitHub issues were opened. The team discussed the importance of performance and the potential impact of making optional ability to deliver fresh JWTs for refreshing session.
+
+We agreed that the nonce pre-fetch issue is the responsibility of the Local Key Helper.
+
+[Sameera/Sasha] Need to document this.
+
+[Kristian] will folllow up internally for using workload request and the potential use of a JavaScript API
+
+**Android and Apple Platform Considerations:** The team discussed the feasibility of implementing key attestation on Windows, Mac, and Android platforms, noting the importance of standard adoption for broader platform support.
+* Windows has all required API.
+* Mac, iOS: we are waiting new shortly.
+* Android: [Kristian] wil start engagement with Android team on producing API attestation API.
+
+**Local Key Helper Deployment:**  The team agreed :
+1. That the local key helper that comes with browser or OS are special, and will be respected by the browser accodingly.
+2. We need to draft a proposal on deploying and registering local key helpers, aiming to reach a consensus on the approach for both first and third-party implementations. 
+
+[Sasha] will draft the propoposal for Windows.
 
 ## 6/4/2024
 
@@ -475,7 +494,9 @@ Altentively we can think as Local Key helper is part of the device registation c
 - can be owned by OS (MS on Windows, MAC)
 - can be owned by Browser (Google Chrome)
 
-# Cut for history
+[End]
+
+# Cut (for history)
 
 ## DBSC key chaining
 
