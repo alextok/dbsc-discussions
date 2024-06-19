@@ -1,3 +1,17 @@
+# Device registration
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant D as D Device registration client
+participant A as A Attestation service
+
+Note over D, A: Provisioning ...
+D->>A: Register device (DeviceKey, AIK for KG, AIK for TPM, AIK for Software)
+A->>D: 200 OK
+```
+
 # IdP calls a public Local Key Helper
 
 ```mermaid
@@ -10,15 +24,11 @@ participant B as B Browser
 participant P as P Local Key Helper
 participant A as A AttestationService
 
-Note over W, A: Provisioning ...
-A->>B: Policy enabling Local Key Helper
-P->>A: Initial Enrollment (AIK?)
-W->>A: Get Root CA
 Note over W, A: Sign in...
 W->>B: Start sign in (302)
 B->>I: Load sign-in (follow the 302)
  
-I->>B: Sec-Session-GenerateKey: RPUrl, [HelperId1, HelperId2,...], nonce, extraParams...
+I->>B: Sec-Session-GenerateKey: RPUrl, IDPUrl, nonce, extraParams...<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2,...])
 B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
  
@@ -55,22 +65,6 @@ W->>B: AuthCookie
 ```
 
 # IdP calls a private Local Key Helper
-
-## Device registration
-
-```mermaid
-sequenceDiagram
-%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-autonumber 1
-participant D as D Device registration client
-participant I as I IdP
-
-Note over D, I: Provisioning ...
-D->>I: Register device (DeviceKey, AIK for KG, AIK for TPM, AIK for Software)
-I->>D: 200 OK
-```
-
-## DBSC key chaining (with perf optimization, confidential client)
 
 ```mermaid
 sequenceDiagram
@@ -169,15 +163,20 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow.
+
+    Owners: Sasha & Sameera
+
 1. We need to publish this spec on DBSC publicly, to get public feedback.
+
+    We need define API parameters very precisely, like an API.
     
     Owners: Sameera & Kristian
 
-1. Can we open this meeting for other industry leaders?
-
+1. Can we open this meeting for other industry leaders? After spec publishing.
     Owners: Sameera & Kristian.
 
-1. Coordinate a session to discuss the feasibility of implementing the protocol on Android, to be able to implement on android and later iOS.
+1. Coordinate a session to discuss the feasibility of implementing the attestation API on Android, to be able to implement on android and later iOS. An Android should have some security enclave, that enforces isolation from admin on the primary os.
 
     Owners: Kristian.
 
@@ -185,11 +184,11 @@ W->>B: AuthCookie
     
     Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
 
-    Owners: Kristian. to resolve on this till 06/18.
+    Owners: Kristian will update DBSC spec for session refresh.
 
-1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp) - Olga is owner.
+1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp).
    
-    Owners: Sasha/Olga should try to document in the draft below.
+    Owners: Sameera/Sasha/Olga should try to document in the draft below.
    
 1. How the local key helper is deployed? Concrete details?
 
@@ -201,11 +200,17 @@ W->>B: AuthCookie
 
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
 
+    Format is JSON ecnoded by base64url.
+
+    Owners: Sameera/Kristian
+
 1. Format of the public key cert/binding statement, and claims it contains.
 
     1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
 
     1. For the sign-in ceremony, after key generation happens, we should discuss how exactly we will deliver pubblic key cert/binding statements and whether it should be a header format. For example, step "Sec-Session-GenerateKey ..., RP , HelperId" is included in a header in a 302 response from IDP, does browser attach Pubkey/Attestation information as a header before executing on a 302?
+
+    Owners: Sameera/Kristian
 
 
 1.  Do we need this step, if we planned to use KeyContainerId?
@@ -234,9 +239,6 @@ W->>B: AuthCookie
 
     ```
 
-1.  We should discuss provisioning flows too in more details
-
-
 # Closed topics
 
 1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
@@ -255,7 +257,9 @@ W->>B: AuthCookie
 
     [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
 
-1.  [Not applicable] Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
+1. We should discuss provisioning flows too in more details
+
+1. [Not applicable] Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
     The new flow doesn't have this issue. Not applicable anymore.
 
@@ -387,6 +391,22 @@ The cleanup can occur:
 
 
 # Meeting notes
+
+## 6/18/2024
+
+**Refresh Session Optimization:** During the meeting, the team agreed to implement refresh session optimization for inactive sessions. This involves adding an optional signal to indicate that workload requests will include additional headers with JWTs to refresh the authentication cookie. **Kristian** is responsible for updating the DBSC with this.
+
+**Spec Formalization:** The team discussed the need to formalize the DBSC key chaining specification, moving beyond an explainer to a formal specification. Plans to start this process soon are underway, with **Sameera** and **Kristian** as the owners.
+
+**API Parameters for Local Key Helper:** We need to define the API parameters for the local key helper precisely. This includes defining the format and parameters for the request and response between the IDP and the local key helper.
+
+The owners are **Sameera** and **Kristian**.
+
+**API Implementation on Android:** The feasibility of implementing the API on Android was discussed, emphasizing the need for the Android team to review the design and determine if the Android platform has security enclaves that can support a new attestation API. **Kristian** is the owner.
+
+**Device Registration and Attestation:** The discussion included the device registration process, and the team has cleaned up diagrams related to this aspect.
+
+**Optimization for the Case When RP Equals IDP:** We need to adjust [the public local key helper diagram](#idp-calls-a-public-local-key-helper) to cover the case when RP equals IDP and can provide a nonce to avoid an extra roundtrip. **Sasha** and **Sameera** are the owners.
 
 ## 6/11/2024
 
