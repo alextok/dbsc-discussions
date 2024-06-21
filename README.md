@@ -27,27 +27,76 @@ participant A as A AttestationService
 Note over W, A: Sign in...
 W->>B: Start sign in (302)
 B->>I: Load sign-in (follow the 302)
- 
+
 I->>B: Sec-Session-GenerateKey: RPUrl, IDPUrl, nonce, extraParams...<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2,...])
 B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
- 
+
 P->>P: Generate Key
- 
+
 P->>A: Get Binding Statement (publicKey, AIK, nonce)
 A->>P: Return binding statement { nonce, extraClaims... }
 P->>B: KeyId, Return binding statement { nonce, extraClaims... }
 B->>B: Remember this key is for RP (and maybe path)
 B->>I: KeyId, Binding statement { nonce, extraClaims... }
- 
+
 I->>B: Sign in ceremony
 B->>I: Sign done
- 
+
 I->>B: Auth tokens, KeyId
 B->>W: Auth tokens, KeyId
- 
+
 Note over W, A: Initiate DBSC ...
 W->>B: StartSession (challenge, token?, KeyId?, **extraParams...**)
+B->>P: Request Sign JWT (uri, challenge, token?, keyId?, **extraParams...**)
+P->>B: Return JWT Signature
+B->>W: POST /securesession/startsession (JWT, tokens)
+W->>W: Validate JWT, <br/>(w/ match to tokens)
+W->>B: AuthCookie
+
+Note over W, A: Refresh DBSC...
+B->>W: GET /securesession/refresh (sessionID)
+W->>B: Challenge, **extraParams...**
+B->>P: Request Sign JWT (sessionID, **extraParams...**)
+P->>B: Return JWT Signature
+B->>W: GET /securesession/refresh (JWT)
+W->>W: Validate JWT (w/public key on file)
+W->>B: AuthCookie
+```
+
+# IdP same as RP, calls a public Local Key Helper
+
+```mermaid
+sequenceDiagram
+%%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+autonumber 1
+participant W as W Relying Party
+participant I as I IdP
+participant B as B Browser
+participant P as P Local Key Helper
+participant A as A AttestationService
+
+Note over W, A: Sign in...
+W->>B: Start sign in (302) <br/> Sec-Session-GenerateKey: RPUrl, IDPUrl, nonce, extraParams...<br/>Sec-Session-HelperIdList: [HelperId1, HelperId2], HelperCacheTime
+
+B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2,...])
+B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
+
+P->>P: Generate Key
+
+P->>A: Get Binding Statement (publicKey, AIK, nonce)
+A->>P: Return binding statement { nonce, extraClaims... }
+P->>B: KeyId, Return binding statement { nonce, extraClaims... }
+B->>B: Remember this key is for RP (and maybe path)
+B->>I: Load sign-in <br/>Sec-Session-Keys: KeyId, Binding statement { nonce, extraClaims... }
+
+I->>B: Sign in ceremony
+B->>I: Sign done
+
+I->>W: API(Auth tokens, KeyId)
+
+Note over W, A: Initiate DBSC ...
+W->>B: 200 OK <br/>Sec-Session-Registration: path, RPChallenge, token?, KeyId, extraParams
 B->>P: Request Sign JWT (uri, challenge, token?, keyId?, **extraParams...**)
 P->>B: Return JWT Signature
 B->>W: POST /securesession/startsession (JWT, tokens)
@@ -89,7 +138,7 @@ alt Cached HelperId present (99.99% cases)
     B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1, HelperId2...])
 
     B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
-    
+
     P->>P: Generate Key
 
     loop For each device
@@ -118,7 +167,7 @@ else No cached HelperId present
 
     B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
     B->>P: Pre-gen key and attest (RPURL, IDPURL, extraParams...)
-    
+
     P->>P: Generate Key
 
     loop For each device
@@ -163,89 +212,92 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. Discuss local key helper specifics - installation, invocation, details across platforms.
+
+1. Should we stick to `nonce` as a uniform term and replace `challenge`?
+
 1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow.
 
-    Owners: Sasha & Sameera
+   Owners: Sasha & Sameera
 
 1. We need to publish this spec on DBSC publicly, to get public feedback.
 
-    We need define API parameters very precisely, like an API.
-    
-    Owners: Sameera & Kristian
+   We need define API parameters very precisely, like an API.
+
+   Owners: Sameera & Kristian
 
 1. Can we open this meeting for other industry leaders? After spec publishing.
-    Owners: Sameera & Kristian.
+   Owners: Sameera & Kristian.
 
 1. Coordinate a session to discuss the feasibility of implementing the attestation API on Android, to be able to implement on android and later iOS. An Android should have some security enclave, that enforces isolation from admin on the primary os.
 
-    Owners: Kristian.
+   Owners: Kristian.
 
-1. Discuss refresh session doing inline with workload requests.     
-    
-    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
+1. Discuss refresh session doing inline with workload requests.
 
-    Owners: Kristian will update DBSC spec for session refresh.
+   Opened a git-hub issue: https://github.com/WICG/dbsc/issues/60
 
-1.  Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp).
-   
-    Owners: Sameera/Sasha/Olga should try to document in the draft below.
-   
+   Owners: Kristian will update DBSC spec for session refresh.
+
+1. Discuss optimizing the flow to avoid an extra redirect - step 17 (start session) can happen in 1 (redirect to IDP), step 20 (bind session) can happen in 16 (response from idp).
+
+   Owners: Sameera/Sasha/Olga should try to document in the draft below.
+
 1. How the local key helper is deployed? Concrete details?
 
-    Owners: Sasha to write an original proposal for deployment.
+   Owners: Sasha to write an original proposal for deployment.
 
 1. Special/trusted by default Local Key helpers (Part of OS or Browser).
 
-    Owners: Sasha to write an original proposal for special local key helpers.
+   Owners: Sasha to write an original proposal for special local key helpers.
 
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
 
-    Format is JSON ecnoded by base64url.
+   Format is JSON ecnoded by base64url.
 
-    Owners: Sameera/Kristian
+   Owners: Sameera/Kristian
 
 1. Format of the public key cert/binding statement, and claims it contains.
 
-    1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
+   1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
 
-    1. For the sign-in ceremony, after key generation happens, we should discuss how exactly we will deliver pubblic key cert/binding statements and whether it should be a header format. For example, step "Sec-Session-GenerateKey ..., RP , HelperId" is included in a header in a 302 response from IDP, does browser attach Pubkey/Attestation information as a header before executing on a 302?
+   1. For the sign-in ceremony, after key generation happens, we should discuss how exactly we will deliver pubblic key cert/binding statements and whether it should be a header format. For example, step "Sec-Session-GenerateKey ..., RP , HelperId" is included in a header in a 302 response from IDP, does browser attach Pubkey/Attestation information as a header before executing on a 302?
 
-    Owners: Sameera/Kristian
+   Owners: Sameera/Kristian
 
+1. Do we need this step, if we planned to use KeyContainerId?
 
-1.  Do we need this step, if we planned to use KeyContainerId?
+   [Olga] Maybe we can use this step to optimize second time invocation?
 
-    [Olga] Maybe we can use this step to optimize second time invocation?
+   ```mermaid
+   sequenceDiagram
+   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+   autonumber 12
+   participant B as B Browser
 
-    ```mermaid
-    sequenceDiagram
-    %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-    autonumber 12
-    participant B as B Browser
+   B->>B: Remember this key is for RP (and maybe path)
+   ```
 
-    B->>B: Remember this key is for RP (and maybe path)
-    ```
+1. Not sure if step 21 needs to be a POST, if we imagine StartSession from RP to be a 302 redirect, then it probably shouldn't be a POST
 
-1.  Not sure if step 21 needs to be a POST, if we imagine StartSession from RP to be a 302 redirect, then it probably shouldn't be a POST
+   ```mermaid
+   sequenceDiagram
+   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+   autonumber 21
+   participant W as W Relying Party
+   participant B as B Browser
 
-    ```mermaid
-    sequenceDiagram
-    %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-    autonumber 21
-    participant W as W Relying Party
-    participant B as B Browser
+   B->>W: POST /securesession/startsession (JWT, tokens)
 
-    B->>W: POST /securesession/startsession (JWT, tokens)
-
-    ```
+   ```
 
 # Closed topics
 
 1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
 
-    Opened a git-hub issue: https://github.com/WICG/dbsc/issues/61
+   Opened a git-hub issue: https://github.com/WICG/dbsc/issues/61
 
-    Decision: It is repsonsobility of the local key helper.
+   Decision: It is repsonsobility of the local key helper.
 
 1. Can any IDP call any local Local Key helper? Should IDP provider a list of key helper ids, not just one?
 
@@ -253,19 +305,19 @@ W->>B: AuthCookie
 
 1. We need to capture, if key doesn't match to auth cookie, the app must retstart the flow.
 
-1. Step 18 above, should it go to the LocalKey helper for signature? (-yes) If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? (-KeyId will identify key helper) 
+1. Step 18 above, should it go to the LocalKey helper for signature? (-yes) If yes, how does step that initiates DBSC session know that it needs to go to the local key helper? (-KeyId will identify key helper)
 
-    [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
+   [Olga] It needs to go to Local key helper for signature at least on non-Windows platforms.
 
 1. We should discuss provisioning flows too in more details
 
 1. [Not applicable] Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
-    The new flow doesn't have this issue. Not applicable anymore.
+   The new flow doesn't have this issue. Not applicable anymore.
 
 1. [Documented] PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
 
-1. [Documented] Will browser rember which KeyId belong to which LocalKey helper? (-yes, browser will rember which keyId) 
+1. [Documented] Will browser rember which KeyId belong to which LocalKey helper? (-yes, browser will rember which keyId)
 
 1. [Documented] The protocol between LocalKey helper and Attestation service doesn't need to be documented as part of the public spec, it can stay internal.
 1. [Documented] Attestation service may not exist.
@@ -273,45 +325,45 @@ W->>B: AuthCookie
 1. [Documented] Existance of the local key helper.
 1. [Documented] Local key helper can be a 3P software.
 1. [Documented] We need to clarify params for this call:
-    ```mermaid
-    sequenceDiagram
-    %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-    autonumber 8
-    participant B as B Browser
-    participant P as P Local Key Helper
 
-    B->>P: Pre-gen key and attest (params?)
-    ````````
-    
-1. [Documented] We planned to use KeyContainerId here (Windows only): 
+   ```mermaid
+   sequenceDiagram
+   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+   autonumber 8
+   participant B as B Browser
+   participant P as P Local Key Helper
 
-    Decision:  We send KeyId, and browser remebers set of key for RP. 
+   B->>P: Pre-gen key and attest (params?)
+   ```
+
+1. [Documented] We planned to use KeyContainerId here (Windows only):
+
+   Decision: We send KeyId, and browser remebers set of key for RP.
+
+   ```mermaid
+   sequenceDiagram
+   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+   autonumber 13
+   participant W as W Relying Party
+   participant I as I IdP
+   participant B as B Browser
+
+   B->>I: PubKey Cert/Binding statement, _KeyContainerId_
+
+   I->>B: Sign in ceremony
+   B->>I: Sign done
 
 
-    ```mermaid
-    sequenceDiagram
-    %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-    autonumber 13
-    participant W as W Relying Party
-    participant I as I IdP
-    participant B as B Browser
+   I->>B: Auth tokens, _KeyContainerId_
+   B->>W: Auth tokens, _KeyContainerId_
 
-    B->>I: PubKey Cert/Binding statement, _KeyContainerId_
+   Note over W, B: Initiate DBSC ...
+   W->>B: StartSession (challenge, tokens, _KeyContainerId_)
+   ```
 
-    I->>B: Sign in ceremony
-    B->>I: Sign done
-
-
-    I->>B: Auth tokens, _KeyContainerId_
-    B->>W: Auth tokens, _KeyContainerId_
-
-    Note over W, B: Initiate DBSC ...
-    W->>B: StartSession (challenge, tokens, _KeyContainerId_)
-    ````````
-1. [Documented] Local key helper needs API for key deletion, for cookie cleanup? - yes, we need api for deletion of the keys. 
-    * we can think about TTL for keys.
+1. [Documented] Local key helper needs API for key deletion, for cookie cleanup? - yes, we need api for deletion of the keys.
+   - we can think about TTL for keys.
 1. [Documented] Should we introduce a new entity "Device registration client"? Local key helper should be considered as a part of the device registration client or not?
-
 
 # Description (Draft)
 
@@ -336,10 +388,11 @@ A client software component that performs the device registration is called a _d
 As mentioned above, the key assumption is that device registration happened in a clean room environment, and it is the responsibility of the device owner to ensure this.
 
 One device registration client can manager multiple devices on the same phisical device. There also can be multiple device registration clients on the same device. The device registration client can be owned and supported by:
-* Operating system - the device gets registered when the OS is installed.
-* Browser - the device gets registered when the browser is installed.
-* Device management software (MDM provider) - the device gets registered when the MDM is enrolled.
-* Third-party software vendor - the device gets registered according to the vendor rules.
+
+- Operating system - the device gets registered when the OS is installed.
+- Browser - the device gets registered when the browser is installed.
+- Device management software (MDM provider) - the device gets registered when the MDM is enrolled.
+- Third-party software vendor - the device gets registered according to the vendor rules.
 
 ## Local key helper
 
@@ -349,9 +402,9 @@ The Local Key Helper can be either public or private. A public Local Key Helper 
 
 The local key helper is responsible for:
 
-* Generation of the binding key and producing binding statements (see below)
-* Producing signatures with the binding key
-* Cleanup of the binding key and its artifacts (when the user clears the browser session or the key is unused for a long time)
+- Generation of the binding key and producing binding statements (see below)
+- Producing signatures with the binding key
+- Cleanup of the binding key and its artifacts (when the user clears the browser session or the key is unused for a long time)
 
 ### Binding keys, binding statement and attestatation keys
 
@@ -376,7 +429,7 @@ Binding statements can be long-lived or short-lived. If an IdP can perform proof
 
 ### Signing DBSC requests
 
-The binding key can be created with special security restrictions or extra properties. The Local Key Helper is responsible for producing the signatures needed for DBSC functioning. 
+The binding key can be created with special security restrictions or extra properties. The Local Key Helper is responsible for producing the signatures needed for DBSC functioning.
 
 ### Cleanup of the binding keys and their artifacts
 
@@ -384,11 +437,10 @@ For the health of the operating system and user privacy, it is important to clea
 
 The cleanup can occur:
 
-* On demand, when the user decides to clear browser cookies
-* Automatically, when a key hasn't been used for a long time (N days) to keep the OS healthy
+- On demand, when the user decides to clear browser cookies
+- Automatically, when a key hasn't been used for a long time (N days) to keep the OS healthy
 
 ## End to end flow
-
 
 # Meeting notes
 
@@ -420,7 +472,7 @@ The team agreed that caching IDP-specific helpers on any response from IDP shoul
 
 [Sameera/Kristian] Should start to work on publshing this spec publicly on DBSC.
 
-**Concerns on Protocol Complexity:** The team expressed concerns about the complexity of creating a generic protocol, suggesting a need to review the overall architecture to ensure it remains manageable. 
+**Concerns on Protocol Complexity:** The team expressed concerns about the complexity of creating a generic protocol, suggesting a need to review the overall architecture to ensure it remains manageable.
 
 **Session refresh for inactive device optimization:** The team debated various approaches for handling refresh sessions, including using workload request and the potential use of a JavaScript API. MS informed the group that GitHub issues were opened. The team discussed the importance of performance and the potential impact of making optional ability to deliver fresh JWTs for refreshing session.
 
@@ -431,13 +483,15 @@ We agreed that the nonce pre-fetch issue is the responsibility of the Local Key 
 [Kristian] will folllow up internally for using workload request and the potential use of a JavaScript API
 
 **Android and Apple Platform Considerations:** The team discussed the feasibility of implementing key attestation on Windows, Mac, and Android platforms, noting the importance of standard adoption for broader platform support.
-* Windows has all required API.
-* Mac, iOS: we are waiting new shortly.
-* Android: [Kristian] wil start engagement with Android team on producing API attestation API.
 
-**Local Key Helper Deployment:**  The team agreed :
+- Windows has all required API.
+- Mac, iOS: we are waiting new shortly.
+- Android: [Kristian] wil start engagement with Android team on producing API attestation API.
+
+**Local Key Helper Deployment:** The team agreed :
+
 1. That the local key helper that comes with browser or OS are special, and will be respected by the browser accodingly.
-2. We need to draft a proposal on deploying and registering local key helpers, aiming to reach a consensus on the approach for both first and third-party implementations. 
+2. We need to draft a proposal on deploying and registering local key helpers, aiming to reach a consensus on the approach for both first and third-party implementations.
 
 [Sasha] will draft the propoposal for Windows.
 
@@ -446,6 +500,7 @@ We agreed that the nonce pre-fetch issue is the responsibility of the Local Key 
 We discussed a new optimization scheme for token binding, which Google is currently evaluating.
 
 We also explored options and feedback for improving the refresh session performance. Two potential solutions were considered:
+
 1. At the moment of cookie expiration, append the binding payload to all requests sent to the RP/Service.
 2. Introduce a JavaScript API to address this issue.
 
@@ -456,6 +511,7 @@ Discussed feedback regarding the general performance of DBSC. MS internally disc
 Issue #1: The client has to wait for a network call to complete from the session refresh endpoint before workload navigation can happen. We can solve this problem by including a special header in the request with refresh session information. There are possible alternative approaches for this, which need to be discussed separately.
 
 Issue #2: The nonce is not fresh on the client. We discussed multiple approaches:
+
 1. Having a browser service to talk to some critical RPs to pre-fetch the nonce.
 2. Allowing nonce pre-fetching by the local key helper.
 
@@ -464,7 +520,6 @@ Kristian will discuss privacy concern with privacy team. Google ok to do it for 
 We've decided to open GitHub issues for the above problems.
 
 There is also feedback on performance of StartSession, MS is working on alternative internally (Olga is driving it).
-
 
 ## 4/23/2024
 
@@ -542,7 +597,7 @@ end
 I->>B: Sec-Session-GenerateKey ..., RP, [HelperId1], extraParams...
 B->>B: currentHelperId = Evaluate policy for (IdP, [HelperId1])
 B->>P: Pre-gen key and attest (RPUrl, IDPUrl, extratParams...)
- 
+
 P->>P: Generate Key
 
 loop For each device
