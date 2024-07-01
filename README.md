@@ -448,8 +448,16 @@ The cleanup can occur:
 
 ## 6/25/2024
 
-pre existing patterns for local key helper across platforms. Phil to help if google has precedence.
-There should be IPC patterns for calling native apps - mobile is a gap?
+**LocalKey helper specifics:** We need a separate discussion(hopefully 7/2) to discuss the details of local key helper installation, invocation across platforms. Windows API will be documented by Sasha. **Olga** is trying to gather if there are pre existing patterns for local key helper across platforms, **Phil** to help if google has precedence. We also need to discuss the specifics of the local key helper deployment, whether it is unmanaged or managed. There should be IPC patterns for calling native apps - Is mobile is a gap?
+
+**Explainer and Specification for Consumer vs. Enterprise:** The current plan will be two-fold:
+
+- **Sameera** to work on adding a public explainer for Enterprise DBSC. Note that specifics of LocalKeyHelper must be concluded as a pre-requisite to open this.
+- **Kristian** and **Sameera** to draft the specification in the upcoming weeks. We are meeting offline to finalize the header names, API definitions and formats for Binding statement, Proof of binding etc.
+
+There is a discussion on whether to have a combined or separate specification for consumer and enterprise use cases, with differing opinions on the best approach. A combined spec is something we are leaning towards for consistent implementation across the industry and to leverage enterprise for consumers if they opt-in.
+
+**Binding Statement Format:** Discussed the need to define the format and content of the binding statement for public local key helpers, emphasizing the importance of including a nonce for security reasons. The room is divided between being strict w.r.t binding statement format, defining it as a parse-able JSON vs leaving the format open as a “string” and specifying in the explainer/specification the role of nonce when the binding statement is validated. The diagrams are updated to add the validation of nonce as a mandatory step, so we can keep the format open ended.
 
 ## 6/18/2024
 
