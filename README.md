@@ -35,23 +35,24 @@ B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
 P->>P: Generate Key
 
 P->>A: Get Binding Statement (publicKey, AIK, nonce)
-A->>P: Return binding statement { nonce, extraClaims... }
-P->>B: KeyId, Return binding statement { nonce, extraClaims... }
+A->>P: Return binding statement { nonce, thumbprint(publicKey), extraClaims... }
+P->>B: KeyId, Return binding statement { nonce, thumbprint(publicKey), extraClaims... }
 B->>B: Remember this key is for RP (and maybe path)
-B->>I: KeyId, Binding statement { nonce, extraClaims... }
+B->>I: Sec-Session-Keys: KeyId, Binding statement { nonce, thumbprint(publicKey), extraClaims... }
+I->>I: validate signature on the binding statement & nonce, store thumbprint
 
 I->>B: Sign in ceremony
 B->>I: Sign done
 
-I->>B: Auth tokens, KeyId
-B->>W: Auth tokens, KeyId
+I->>B: Auth tokens (with thumbprint), KeyId
+B->>W: Auth tokens (with thumbprint), KeyId
 
 Note over W, A: Initiate DBSC ...
 W->>B: StartSession (challenge, token?, KeyId?, **extraParams...**)
 B->>P: Request Sign JWT (uri, challenge, token?, keyId?, **extraParams...**)
 P->>B: Return JWT Signature
 B->>W: POST /securesession/startsession (JWT, tokens)
-W->>W: Validate JWT, <br/>(w/ match to tokens)
+W->>W: Validate JWT, <br/>(w/ match thumbprint in the tokens)
 W->>B: AuthCookie
 
 Note over W, A: Refresh DBSC...
@@ -85,22 +86,23 @@ B->>P: Pre-gen key and attest (RPUrl, IDPUrl, nonce, extratParams...)
 P->>P: Generate Key
 
 P->>A: Get Binding Statement (publicKey, AIK, nonce)
-A->>P: Return binding statement { nonce, extraClaims... }
-P->>B: KeyId, Return binding statement { nonce, extraClaims... }
+A->>P: Return binding statement { nonce, thumbprint(publicKey), extraClaims... }
+P->>B: KeyId, Return binding statement { nonce, thumbprint(publicKey), extraClaims... }
 B->>B: Remember this key is for RP (and maybe path)
-B->>I: Load sign-in <br/>Sec-Session-Keys: KeyId, Binding statement { nonce, extraClaims... }
+B->>I: Load sign-in <br/>Sec-Session-Keys: KeyId, Binding statement { nonce,  thumbprint(publicKey), extraClaims... }
+I->>I: validate signature on the binding statement and nonce, store thumprint
 
 I->>B: Sign in ceremony
 B->>I: Sign done
 
-I->>W: API(Auth tokens, KeyId)
+I->>W: API(Auth tokens with thumbprint, KeyId)
 
 Note over W, A: Initiate DBSC ...
 W->>B: 200 OK <br/>Sec-Session-Registration: path, RPChallenge, token?, KeyId, extraParams
 B->>P: Request Sign JWT (uri, challenge, token?, keyId?, **extraParams...**)
 P->>B: Return JWT Signature
 B->>W: POST /securesession/startsession (JWT, tokens)
-W->>W: Validate JWT, <br/>(w/ match to tokens)
+W->>W: Validate JWT, <br/>(w/ match thumbprint in the tokens)
 W->>B: AuthCookie
 
 Note over W, A: Refresh DBSC...
@@ -212,21 +214,25 @@ W->>B: AuthCookie
 
 # Open topics
 
-1. Discuss local key helper specifics - installation, invocation, details across platforms.
+1. Binding statement Format - String is preferred, as we want to keep the format open to allow for platform-specific optimizations. Since nonce is necessary to be validated, the diagrams are updated to reflect this, allowing open format for strings. Owners: Sameera/Kristian to close this with the broader group.
 
-1. Should we stick to `nonce` as a uniform term and replace `challenge`?
+1. Chromium contribution for DBSC - Outline the new work needed to support enterprise DBSC.
+   Owners: Sameera
 
-1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow.
+1. Discuss local key helper specifics - installation, invocation, details across platforms. Unmanaged? Managed?
+   How the local key helper is deployed? Concrete details? Special/trusted by default Local Key helpers (Part of OS or Browser).
+   Owners: Sasha for Windows, Olga for Mac, Kristian/Amit for Android - original proposal for deployment, original proposal for special local key helpers.
+
+1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow. The flow is available now, can folks review and approve it?
 
    Owners: Sasha & Sameera
 
-1. We need to publish this spec on DBSC publicly, to get public feedback.
-
-   We need define API parameters very precisely, like an API.
+1. We need to publish this spec on DBSC publicly, to get public feedback. We need define API parameters very precisely, like an API.
 
    Owners: Sameera & Kristian
 
 1. Can we open this meeting for other industry leaders? After spec publishing.
+
    Owners: Sameera & Kristian.
 
 1. Coordinate a session to discuss the feasibility of implementing the attestation API on Android, to be able to implement on android and later iOS. An Android should have some security enclave, that enforces isolation from admin on the primary os.
@@ -243,17 +249,9 @@ W->>B: AuthCookie
 
    Owners: Sameera/Sasha/Olga should try to document in the draft below.
 
-1. How the local key helper is deployed? Concrete details?
-
-   Owners: Sasha to write an original proposal for deployment.
-
-1. Special/trusted by default Local Key helpers (Part of OS or Browser).
-
-   Owners: Sasha to write an original proposal for special local key helpers.
-
 1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
 
-   Format is JSON ecnoded by base64url.
+   Format is JSON.
 
    Owners: Sameera/Kristian
 
@@ -278,20 +276,11 @@ W->>B: AuthCookie
    B->>B: Remember this key is for RP (and maybe path)
    ```
 
-1. Not sure if step 21 needs to be a POST, if we imagine StartSession from RP to be a 302 redirect, then it probably shouldn't be a POST
-
-   ```mermaid
-   sequenceDiagram
-   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
-   autonumber 21
-   participant W as W Relying Party
-   participant B as B Browser
-
-   B->>W: POST /securesession/startsession (JWT, tokens)
-
-   ```
-
 # Closed topics
+
+1. Should we stick to `nonce` as a uniform term and replace `challenge`?
+   Conclusion: We should stick to `nonce` as a uniform term. Header name can be `Challenge` and `Nonce` as the parameter name.
+   Owners: Sameera/Kristian to update specs
 
 1. Pre-fetch nonce protocol open issue on git-hub, Kristian will discuss privacy concern with privacy team. Google ok to do it for enterprise, but not for consumers. Discuss with Erik for resouces for this optimization. Can the browser call the OS for nonce-generation, provided the RPs build that optimization?
 
@@ -314,6 +303,19 @@ W->>B: AuthCookie
 1. [Not applicable] Sec-Session-GenerateKey is an extra roundtrip in the 1st party diagram that is not required.
 
    The new flow doesn't have this issue. Not applicable anymore.
+
+1. [Covered in diagrams] Not sure if step 21 needs to be a POST, if we imagine StartSession from RP to be a 302 redirect, then it probably shouldn't be a POST
+
+   ```mermaid
+   sequenceDiagram
+   %%{ init: { 'sequence': { 'noteAlign': 'left'} } }%%
+   autonumber 21
+   participant W as W Relying Party
+   participant B as B Browser
+
+   B->>W: POST /securesession/startsession (JWT, tokens)
+
+   ```
 
 1. [Documented] PublicKey cert/binding statement can be either short-lived (IdP and Local Key helper belong to different vendors) or long-lived(IdP and Local Key helper belong to the same vendor).
 
@@ -443,6 +445,11 @@ The cleanup can occur:
 ## End to end flow
 
 # Meeting notes
+
+## 6/25/2024
+
+pre existing patterns for local key helper across platforms. Phil to help if google has precedence.
+There should be IPC patterns for calling native apps - mobile is a gap?
 
 ## 6/18/2024
 
