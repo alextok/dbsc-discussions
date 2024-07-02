@@ -214,7 +214,9 @@ W->>B: AuthCookie
 
 # Open topics
 
-1. Binding statement Format - String is preferred, as we want to keep the format open to allow for platform-specific optimizations. Since nonce is necessary to be validated, the diagrams are updated to reflect this, allowing open format for strings. Owners: Sameera/Kristian to close this with the broader group.
+1. Scoping for Localkey helper definitions, check the precedence with Standards bodies and Browser ecosystem(Chromium) to check if there are any existing patterns. Owners: Sameera/Kristian
+
+1. Call out key generation optimization in all diagrams. Owners: Sameera
 
 1. Chromium contribution for DBSC - Outline the new work needed to support enterprise DBSC.
    Owners: Sameera
@@ -276,7 +278,11 @@ W->>B: AuthCookie
    B->>B: Remember this key is for RP (and maybe path)
    ```
 
+   Introduce an optional signalling from the local keyhelper to indicate if binding statement needs to be cached in the browser.
+
 # Closed topics
+
+1. [Concluded]Binding statement Format - String is preferred, as we want to keep the format open to allow for platform-specific optimizations. Since nonce is necessary to be validated, the diagrams are updated to reflect this, allowing open format for strings. Owners: Sameera/Kristian to close this with the broader group.
 
 1. Should we stick to `nonce` as a uniform term and replace `challenge`?
    Conclusion: We should stick to `nonce` as a uniform term. Header name can be `Challenge` and `Nonce` as the parameter name.
@@ -445,6 +451,13 @@ The cleanup can occur:
 ## End to end flow
 
 # Meeting notes
+
+## 7/2/2024
+
+- Android specifics: Which API can be used for generating attestation statement? How to generate the attestation key? Which API to use for validating the attestation statement in the backend?
+- Local KeyHandler specifics:
+  - Invocation specifics: Windows/Mac/iOS/Android, are we using the same API or different APIs?
+  - Scoping - how much are we going to define these or just leave it to the implementers? Which browser APIs are we going to use? Do we need to define it per browser?
 
 ## 6/25/2024
 
