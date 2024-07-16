@@ -443,11 +443,11 @@ i.e.
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\LocalKeyHelperList]
 ```````
 
-Every local key helper has a child key in the above registry key. The entry for the local key is a registry key with the name equals to the local key helper id, value prefixed by an activation scheme.
+Every local key helper has a child key in the above registry key. The entry for the local key is a registry key with the name equals to the local key helper id, the default value stores activation ID, prefixed by an activation scheme.
 
 ``````
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\<Company>\<Browser>\LocalKeyHelperList\<LocalKeyHelperId>]
-@="<Scheme>:<API activation Id>"
+@="<Scheme>:<API activation ID>"
 ``````
 Here is example:
 
@@ -460,8 +460,8 @@ Here is example:
 ```````
 
 Currently the supported schemes are:
-1.	clsid: \<GUID\> - CLSID of the com class that implements the Local Key Helper.
-2.	progid:\<ProgId string\> - Prog id of the local key helper.
+1.	clsid: \<GUID\> - CLSID of a COM class that implements the Local Key Helper.
+2.	progid:\<ProgId string\> - [a programic identifier](https://learn.microsoft.com/en-us/windows/win32/com/-progid--key) of the local key helper.
 
 This scheme can be extended by other schemes in future.
 The local key helper registry key can have extra values, which we can use for in future.
