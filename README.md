@@ -476,8 +476,6 @@ When the browser needs to communicate with a local key helper. It uses its ID to
 
 Well-known local key helper list on Windows is a list of helperId to clsid, that either harcoded or predefined in the browser settings.
 
-
-
 ### Binding keys, binding statement and attestatation keys
 
 A _binding key_ is an asymmetric key pair that is used to bind an auth cookie. This key is also defined in the DBSC original spec. The thumbprint of the key is stored in the session or auth cookies, depending on the implementation. It is expected that the binding key is created in a secure enclave on the original device. However, the original DBSC proposal doesn't allow to validate, as the binding key can be created on an attacker-controlled device.
