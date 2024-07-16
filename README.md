@@ -454,6 +454,16 @@ The cleanup can occur:
 
 # Meeting notes
 
+## 7/16/2024
+
+- Local KeyHelper follow-up:
+  - Microsoft is proposing COM API for Windows, Kristian to follow up internally on this proposal
+  - On Mac - can use sockets or XPC. Suggestion is to do XPC. Double check if there're any sandboxing restrictions (very unlikely). 
+  - Android - intents, Olga to see with Amit what we're using for brokers for background IPC
+  - iOS - for consumers, follow up on feasibility from Google side, for enterprises, on MDM managed devices we can use Enterprise SSO. Generally lower priority that other platforms. 
+- Android attestation sample follow-up:
+  - Perf characteristics, perf is not know right now, not all devices support it (Strongbox is supported by 10-20%, most devices support TEE, Kristian to follow up). 
+
 ## 7/2/2024
 
 - Android specifics: Which API can be used for generating attestation statement? How to generate the attestation key? Which API to use for validating the attestation statement in the backend?
