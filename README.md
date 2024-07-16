@@ -225,6 +225,8 @@ W->>B: AuthCookie
    How the local key helper is deployed? Concrete details? Special/trusted by default Local Key helpers (Part of OS or Browser).
    Owners: Sasha for Windows, Olga for Mac, Kristian/Amit for Android - original proposal for deployment, original proposal for special local key helpers.
 
+   Windows: https://github.com/alextok/dbsc-discussions/pull/3
+
 1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow. The flow is available now, can folks review and approve it?
 
    Owners: Sasha & Sameera
