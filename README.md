@@ -457,6 +457,7 @@ The cleanup can occur:
 ## 7/16/2024
 
 - Local KeyHelper follow-up:
+  - Follow up for next week: Microsoft's proposal is to support a set of default key helpers, those can be built into browser or OS. Those don't need additional policy/registry key to become active. Kristian/Phil to follow up to approve this proposal. Everyone to review Sasha's PR: https://github.com/alextok/dbsc-discussions/pull/3/files
   - Microsoft is proposing COM API for Windows, Kristian to follow up internally on this proposal
   - On Mac - can use sockets or XPC. Suggestion is to do XPC. Double check if there're any sandboxing restrictions (very unlikely). 
   - Android - intents, Olga to see with Amit what we're using for brokers for background IPC
