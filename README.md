@@ -416,9 +416,9 @@ The local key helper is responsible for:
 - Producing signatures with the binding key
 - Cleanup of the binding key and its artifacts (when the user clears the browser session or the key is unused for a long time)
 
-From deployment point of view there are two types of local key helpers: well-known and third party.
+From the deployment point of view there are two types of local key helpers: _well-known_ and _third party_.
 
-Well-known local key helpers come with either OS or built into the browser. It assumed that well-known key helpers are trusted and enabled by default in a browser. A browser knows how to activate a well-known key helper.
+_Well-known local key helpers_ come with either OS or built into the browser. It assumed that well-known key helpers are **trusted and enabled by default** in a browser. A browser knows how to activate a well-known key helper.
 
 A third party local key helper has a special deployment mechanism.
 
@@ -443,7 +443,7 @@ i.e.
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\LocalKeyHelperList]
 ```````
 
-Every local key helper has a child entry in the above registry key. The entry for the local key is a registry key with the name equals to local key helper, value prefixed by the scheme.
+Every local key helper has a child key in the above registry key. The entry for the local key is a registry key with the name equals to the local key helper id, value prefixed by an activation scheme.
 
 ``````
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\<Company>\<Browser>\LocalKeyHelperList\<LocalKeyHelperId>]
@@ -463,18 +463,18 @@ Currently the supported schemes are:
 1.	clsid: \<GUID\> - CLSID of the com class that implements the Local Key Helper.
 2.	progid:\<ProgId string\> - Prog id of the local key helper.
 
-This scheme can be extended in the future by other schemes.
-The local key helper registry key in future can have extra values, which we can use in future.
+This scheme can be extended by other schemes in future.
+The local key helper registry key can have extra values, which we can use for in future.
 
 Here is a visual example how Local key helper is organized:
 
 ![Local key helper registry key](./images/keyhelper-reg.png)
 
-When the browser needs to communicate with a local key helper. It uses its ID to locate the registry key, then reads the default value of this registry key and activates the object by CLSID or ProgId. After activation it queries ILocalKeyHelper interface and invokes corresponding methods.
+When the browser needs to communicate with a local key helper. It uses its ID to locate the registry key, then reads the default value of this registry key and activates the object by the activation scheme (CLSID or ProgId according to the document). After activation it queries ILocalKeyHelper interface and invokes corresponding methods.
 
 #### Well-known local key helpers on Windows
 
-Well-known local key helper list on Windows is a list of helperId to clsid, that either harcoded or predefined in the browser settings.
+A well-known local key helper list on Windows is a list of helperId to clsid, that either harcoded or predefined in the browser settings.
 
 ### Binding keys, binding statement and attestatation keys
 
