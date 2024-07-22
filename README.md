@@ -253,12 +253,6 @@ W->>B: AuthCookie
 
    Owners: Sameera/Sasha/Olga should try to document in the draft below.
 
-1. Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
-
-   Format is JSON.
-
-   Owners: Sameera/Kristian
-
 1. Format of the public key cert/binding statement, and claims it contains.
 
    1. We can have multiple public key cert/binding statements for one key, when IdP and LocalKey helper are developed by the same vendor, how we include it?
@@ -283,6 +277,12 @@ W->>B: AuthCookie
    Introduce an optional signalling from the local keyhelper to indicate if binding statement needs to be cached in the browser.
 
 # Closed topics
+
+1. [Added in diagrams, TB documented]Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
+
+   Format is JSON.
+
+   Owners: Sameera/Kristian
 
 1. [Concluded]Binding statement Format - String is preferred, as we want to keep the format open to allow for platform-specific optimizations. Since nonce is necessary to be validated, the diagrams are updated to reflect this, allowing open format for strings. Owners: Sameera/Kristian to close this with the broader group.
 
