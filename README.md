@@ -214,6 +214,10 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. [Document] Policy is mandated for enterprise, but not for consumers. All enterprise users will be behind a policy. Edge may turn in ON by default. Chrome may turn it OFF by default. Owners: Sameera
+
+1. Close on Policy specifics. Policy details, shape, Registry vs Cloud deplyment, choice between Local Key Helpers etc. Owners: Sameera
+
 1. Scoping for Localkey helper definitions, check the precedence with Standards bodies and Browser ecosystem(Chromium) to check if there are any existing patterns. Owners: Sameera/Kristian
 
 1. Call out key generation optimization in all diagrams. Owners: Sameera
@@ -454,16 +458,38 @@ The cleanup can occur:
 
 # Meeting notes
 
+## 7/24/2024
+
+- Policy preferred by google for everything in enterprise.
+
+  - Edge probably will follow the same policy. Can we discuss this further? ON or OFF by default? Should follow the pattern of injecting SSO state with PRT Cookie Header in Edge today.
+  - Policy specifics? Can we use existing policies? (Sameera to follow up - list the policy for Chrome,Edge)
+  - Should this be registry key or a cloud based policy?
+  - Platform specifics to follow - Mac (Kai), Android (Amit)
+
+- Policy specifics
+
+  - Choice of local key helper - should this be at the OS level or browser level in the policy?
+  - Written proposal for Policy specifics regarding local key helper.
+
+- Consumer attestation in stages.
+  - DBSC for consumers
+  - DBSC(E) enabled for enterprise
+  - DBSC(E) opt-in for consumers with IDP/LocalKeyHelper option (DO NOT ADD in the spec in V1)
+    - Should we document privacy concerns here? (Sameera to document for consumer attestation)
+    - Websites being able to track the users is a concern if the policy is ON by default (?) - Sameera to follow up - summarize the tracking is not possible. TRACK this later as V2 with DBSC(E) + Consumers
+    - PERCEPTION
+
 ## 7/16/2024
 
 - Local KeyHelper follow-up:
   - Follow up for next week: Microsoft's proposal is to support a set of default key helpers, those can be built into browser or OS. Those don't need additional policy/registry key to become active. Kristian/Phil to follow up to approve this proposal. Everyone to review Sasha's PR: https://github.com/alextok/dbsc-discussions/pull/3/files
   - Microsoft is proposing COM API for Windows, Kristian to follow up internally on this proposal
-  - On Mac - can use sockets or XPC. Suggestion is to do XPC. Double check if there're any sandboxing restrictions (very unlikely). 
+  - On Mac - can use sockets or XPC. Suggestion is to do XPC. Double check if there're any sandboxing restrictions (very unlikely).
   - Android - intents, Olga to see with Amit what we're using for brokers for background IPC
-  - iOS - for consumers, follow up on feasibility from Google side, for enterprises, on MDM managed devices we can use Enterprise SSO. Generally lower priority that other platforms. 
+  - iOS - for consumers, follow up on feasibility from Google side, for enterprises, on MDM managed devices we can use Enterprise SSO. Generally lower priority that other platforms.
 - Android attestation sample follow-up:
-  - Perf characteristics, perf is not know right now, not all devices support it (Strongbox is supported by 10-20%, most devices support TEE, Kristian to follow up). 
+  - Perf characteristics, perf is not know right now, not all devices support it (Strongbox is supported by 10-20%, most devices support TEE, Kristian to follow up).
 
 ## 7/2/2024
 
