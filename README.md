@@ -491,7 +491,7 @@ And for each manifest file:
       {
         "service": "com.contoso.LocalKeyHelper", // service name/API activation id
         "version": "0.0.1", // Helper service version
-        "urls":["login.microsoftonline.com", "login.windows.net"] // This are the URLs the local key helper is used for
+        "urls":["login.contoso1.com", "login.contoso2.net"] // This are the URLs the local key helper is used for
       }   
   }
 ```
