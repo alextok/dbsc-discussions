@@ -490,7 +490,8 @@ And for each manifest file:
       "xpc": // Local key helper type
       {
         "service": "com.contoso.LocalKeyHelper", // service name/API activation id
-        "version": "0.0.1" // Helper service version
+        "version": "0.0.1", // Helper service version
+        "urls":["login.microsoftonline.com", "login.windows.net"] // This are the URLs the local key helper is used for
       }   
   }
 ```
