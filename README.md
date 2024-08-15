@@ -214,28 +214,28 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. Push the list of URLs supported for key generation in Windows. Owners: Sasha
+
 1. [Document] Policy is mandated for enterprise, but not for consumers. All enterprise users will be behind a policy. Edge may turn in ON by default. Chrome may turn it OFF by default. Owners: Sameera
 
-1. Close on Policy specifics. Policy details, shape, Registry vs Cloud deplyment, choice between Local Key Helpers etc. Owners: Sameera
+1. [Document]Close on Policy specifics. Policy details, shape, Registry vs Cloud deplyment, choice between Local Key Helpers etc. Owners: Sameera
 
-1. Scoping for Localkey helper definitions, check the precedence with Standards bodies and Browser ecosystem(Chromium) to check if there are any existing patterns. Owners: Sameera/Kristian
+1. [Spec][Document]Scoping for Localkey helper definitions, check the precedence with Standards bodies and Browser ecosystem(Chromium) to check if there are any existing patterns. Owners: Sameera/Kristian
 
-1. Call out key generation optimization in all diagrams. Owners: Sameera
+1. [Document]Call out key generation optimization in all diagrams. Owners: Sameera
 
-1. Chromium contribution for DBSC - Outline the new work needed to support enterprise DBSC.
+1. [Planning]Chromium contribution for DBSC - Outline the new work needed to support enterprise DBSC.
    Owners: Sameera
 
-1. Discuss local key helper specifics - installation, invocation, details across platforms. Unmanaged? Managed?
+1. [InProgress]Discuss local key helper specifics - installation, invocation, details across platforms. Unmanaged? Managed?
    How the local key helper is deployed? Concrete details? Special/trusted by default Local Key helpers (Part of OS or Browser).
    Owners: Sasha for Windows, Olga for Mac, Kristian/Amit for Android - original proposal for deployment, original proposal for special local key helpers.
 
    Windows: https://github.com/alextok/dbsc-discussions/pull/3
 
-1. We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow. The flow is available now, can folks review and approve it?
-
    Owners: Sasha & Sameera
 
-1. We need to publish this spec on DBSC publicly, to get public feedback. We need define API parameters very precisely, like an API.
+1. [InProgress]We need to publish this spec on DBSC publicly, to get public feedback. We need define API parameters very precisely, like an API.
 
    Owners: Sameera & Kristian
 
@@ -243,9 +243,11 @@ W->>B: AuthCookie
 
    Owners: Sameera & Kristian.
 
-1. Coordinate a session to discuss the feasibility of implementing the attestation API on Android, to be able to implement on android and later iOS. An Android should have some security enclave, that enforces isolation from admin on the primary os.
+1. [InProgress]
 
-   Owners: Kristian.
+Coordinate a session to discuss the feasibility of implementing the attestation API on Android, to be able to implement on android and later iOS. An Android should have some security enclave, that enforces isolation from admin on the primary os.
+
+Owners: Amit.
 
 1. Discuss refresh session doing inline with workload requests.
 
@@ -281,6 +283,8 @@ W->>B: AuthCookie
    Introduce an optional signalling from the local keyhelper to indicate if binding statement needs to be cached in the browser.
 
 # Closed topics
+
+1. [Documented]We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow. The flow is available now, can folks review and approve it?
 
 1. [Added in diagrams, TB documented]Protocol between IdP and LocalKey helper, if they belong to different vendors (Note: we need to solve clock-skew problem between IdP and Attestation server, probably embed nonce in the request)
 
@@ -458,6 +462,27 @@ The cleanup can occur:
 
 # Meeting notes
 
+## 8/13/2024
+
+- Local Key Helper docs
+
+  - Windows: URL addition pending (Sasha)
+  - Mac: Kai's doc under review, no major docs
+  - Android: No docs yet, Amit to push something this week
+
+- Explainer
+
+  - PR to be shared publicly (Sameera)
+
+- DBSC contribution to Chromium
+
+  - Kevin(Microsoft) started a stream with Kristian(google) to discuss the contribution
+  - Work mostly focused on gaps in DBSC
+
+## 8/6/2024
+
+- Disussion on windows local key helper details. Additional work to add URLs list (Sasha) captured in pending tasks.
+
 ## 7/24/2024
 
 - Policy preferred by google for everything in enterprise.
@@ -472,7 +497,8 @@ The cleanup can occur:
   - Choice of local key helper - should this be at the OS level or browser level in the policy?
   - Written proposal for Policy specifics regarding local key helper.
 
-- Consumer attestation in stages.
+- Consumer attestation in stages
+
   - DBSC for consumers
   - DBSC(E) enabled for enterprise
   - DBSC(E) opt-in for consumers with IDP/LocalKeyHelper option (DO NOT ADD in the spec in V1)
