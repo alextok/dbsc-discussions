@@ -426,7 +426,7 @@ On macOS, a Local Key Helper is a protocol (`LocalKeyHelper.h`), and its impleme
 
 The Local Key Helper will be implemented and shipped as an XPC service on macOS. It will be signed with app sandbox entitlement for securety requirement.
 
-To start the Local Key Helper XPC service, the service plist (property list) needs to be defined and registered in the launchAgent. This will ensure that the service starts up after each user's system signing session.
+To start the Local Key Helper XPC service, the service plist (property list) needs to be defined and registered in the launchAgent. This will ensure the service starts up when a idP sends a service connections.
 
 Here is an example of the Local Key Helper XPC service plist:
 
@@ -439,8 +439,6 @@ Here is an example of the Local Key Helper XPC service plist:
     <string>com.contoso.LocalKeyHelper</string>
     <key>Program</key>
     <string>/pathToXcpService/LocalKepHelper.xpc/Contents/MacOS/LocalKepHelper</string>
-    <key>RunAtLoad</key>
-    <true/>
     <key>KeepAlive</key>
     <true/>
     <key>MachServices</key>
@@ -472,7 +470,11 @@ The browser (e.g. Chrome) can then call the methods defined in the LocalKeyHelpe
 - Un-sandboxed applications can communicate directly to the XPC service.
 
 #### Define Available Local Key Helpers
-To inform the browser about the Local Key Helper to use, the manifest file is created within the browser's root folder during the LocalKeyHelper's installation (e.g. `/Library/Google/Chrome/LocalKeyHelpers`). This folder contains the following files:
+To inform the browser about the Local Key Helper to use, the manifest file is created within the browser's root folder during the LocalKeyHelper's installation (e.g. `/Library/Google/Chrome/LocalKeyHelpers`). This folder contains the following 2 types of files:
+
+**1st type: files that define the Local Key Helpers**
+
+i.e.
 ````
 com.provider1.LocalKeyHelper.json (if helper was installed)
 com.provider2.LocalKeyHelper.json (if helper was installed)
@@ -482,19 +484,35 @@ For example:
 ````
 com.contoso.LocalKeyHelper.json
 ````
-And for each manifest file:
+
+Within the file:
 
 ```json
   {
     "provider": "contoso",
       "xpc": // Local key helper type
       {
-        "service": "com.contoso.LocalKeyHelper", // service name/API activation id
+        "service": "com.contoso.LocalKeyHelper", // Service name/API activation id
         "version": "0.0.1", // Helper service version
-        "urls":["login.contoso1.com", "login.contoso2.net"] // This are the URLs the local key helper is used for
+        "Idp_resource":"com.contoso.LocalKeyHelper.idP.json" // File path to IdP URL allow-list
       }   
   }
 ```
+
+**2nd type: files that defines the allow-list for IdP URLs:**
+
+For example:
+````
+com.contoso.LocalKeyHelper.idP.json
+````
+
+```json
+  {
+    "urls": ["*.contoso1.com", "login.contoso1.net", "login.contoso2.com"],
+  }
+```
+
+The MDM service can do post script to update the URLs in this file without touching the Local Key Helpers file. 
 
 ### Binding keys, binding statement and attestatation keys
 
