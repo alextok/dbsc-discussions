@@ -214,6 +214,10 @@ W->>B: AuthCookie
 
 # Open topics
 
+1. [Document]Add examples for private key helper messaging for session start, and work with google to add optional signalling for the browser to return a JWT as a response to sign in (will it be IDP URL or IDP URL + KeyId). Owner: Sameera 
+
+1. [Document]How much of Key rotation (for AIK) specifics should be added in the explainer/spec? Do we specify what happens to the protocol if AIK cannot be trusted anymore for any reason? Do we prescribe options for IDPs that have session revocation capabilities or do we leave it completely to the vendors? Owner: Sameera
+
 1. [Spec]Header name approval process with IETF to be kicked off after TPAC. Owners: Kristian, Sameera
 
 1. [Document]Push the list of URLs supported for key generation in Windows. Owners: Sasha
@@ -465,6 +469,16 @@ The cleanup can occur:
 ## End to end flow
 
 # Meeting notes
+
+## 9/17/2021
+
+- TPAC participation: Sep 25 10 - 11 AM is the presentation, Sep 26 has a working session (to update the time later)
+   - Informal, plan: 5 min brief by Ben, 5-10 min DBSC summary by Kristian, 5-10 min DBSC(E) summary by Sasha, Q&A as applicable.
+   - Working session is expected to be for folks who are interested in details.
+   - Sameera to check about remote participation for the session for other IDNA/Edge folks not present in person.
+- Clarified optional signalling for binding statement caching in private local key helper use case.
+- Update what should be the signal for browser when `Sec-session-registration` is sent by the RP for the browser to return a JWT with the response, should it be just the IDP URL or should it include keyId? Google asked to clarify this with examples so they can review. Added in open topics.
+
 
 ## 9/10/2024
 
