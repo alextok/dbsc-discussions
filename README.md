@@ -214,9 +214,11 @@ W->>B: AuthCookie
 
 # Open topics
 
-1. Push the list of URLs supported for key generation in Windows. Owners: Sasha
+1. [Spec]Header name approval process with IETF to be kicked off after TPAC. Owners: Kristian, Sameera
 
-1. [Document] Policy is mandated for enterprise, but not for consumers. All enterprise users will be behind a policy. Edge may turn in ON by default. Chrome may turn it OFF by default. Owners: Sameera
+1. [Document]Push the list of URLs supported for key generation in Windows. Owners: Sasha
+
+1. [Document]Policy is mandated for enterprise, but not for consumers. All enterprise users will be behind a policy. Edge may turn in ON by default. Chrome may turn it OFF by default. Probably will be added in Spec, discuss how much we want to add this in enterprise. Owners: Sameera
 
 1. [Document]Close on Policy specifics. Policy details, shape, Registry vs Cloud deplyment, choice between Local Key Helpers etc. Owners: Sameera
 
@@ -283,6 +285,8 @@ Owners: Amit.
    Introduce an optional signalling from the local keyhelper to indicate if binding statement needs to be cached in the browser.
 
 # Closed topics
+
+1. [Documented]Add examples of clean room in the explainer.
 
 1. [Documented]We need to cover case when RP == IDP, they provide nonce, and able to use optimized flow. The flow is available now, can folks review and approve it?
 
@@ -461,6 +465,41 @@ The cleanup can occur:
 ## End to end flow
 
 # Meeting notes
+
+## 9/10/2024
+
+- Key rotation in enterprise case, how does it work? Does it make sense for AIK to be rotated? What does it mean for existing session keys if AIK is rotated? Do we expect to provide options for IDPs that are capable of session revocation a signal when AIK is rotated? Do we have to allow for a custom attestation service to rotate AIK in the protocol?
+- Discussed refresh session optimization with google, currently indicated with a flag: `defer_requests: true` as the default and can be flipped. This will be an optional signal to indicate that workload requests will include additional headers with JWTs to refresh the authentication cookie.
+- Updates on explainer specific topics.
+
+## 9/3/2024
+
+- Slack channel for DBSC with github established, with github, chrome and edge teams. 
+- Meeting github on 9/11 in person, Edge and IDNA plan to attend. 
+- Edge has a new POC for a few months, Chandra is the new Kevin.
+
+
+## 8/27/2024
+
+- Google does not have an use case for DBSC-E, they use Device Trust Connector to establish proof of device and planning to stick to that in the near future. Device trust connector is where chrome establishes a handshake with partners(IDP) provides device signal, and adds a TPM attested device id as a part of the handshake, which inturn is used in cookies and validated periodically. This can be eventually paired up with DBSC(E) for better protection, however, unless a partner asks, google is not investing in implementation of DBSC(E) yet. Once DBSC and DBSC(E) are presented to the community, if there is interest by the partners, the enterprise version might get picked up.
+- IETF follow up for header name registration to be tracked after TPAC.
+
+
+## 8/21/2024
+
+- github queries
+
+   - Discussed details on how enterprise keys are generated and a definition/example of clean room.
+   - Clarify DBSC vs DBSC(E) in the explainer to make it clear for Services that need to opt in to the appropriate use case.
+   - Key management: discussed difference between binding key and attestation key, their management. Clarified the spec does not cover attestation key management.
+   - Key management is always limited to Local Key Helper (or IDP when the local key helper is shipped with IDP), in an ideal world we expect an ecosystem of IDPs and local key helpers.
+
+- Broached the topic of how DBSC can be tied to pass keys
+
+   - Attestion being tied to security key as an option
+   - Link passkeys to Attestation key, however this still requires Attestation key belongs to the same device? 
+   - For consumers, the concept of device does not exist, only the browser session. The strategy was to secure a logged in session and may be use pass keys to solve the problem of securely logging into the session. It is impossible to differentiate a consumer device or a device in the middle. May be a precondition of tying up an attestation key with browser installation can help with some mitigation. Open and EVOLVING discussion in the passkeys community who are also engaged with DBSC.
+
 
 ## 8/13/2024
 
