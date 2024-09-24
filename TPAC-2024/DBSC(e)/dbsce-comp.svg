@@ -1,0 +1,39 @@
+<svg width="1075" height="630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden">
+	<g>
+		<path d="M9 116 1054.1 116 1054.1 118 9 118ZM1052.76 113 1060.76 117 1052.76 121Z" fill="#156082"/>
+		<path d="M110 116.5C110 111.806 114.253 108 119.5 108 124.747 108 129 111.806 129 116.5 129 121.194 124.747 125 119.5 125 114.253 125 110 121.194 110 116.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M203 116.5C203 111.806 207.477 108 213 108 218.523 108 223 111.806 223 116.5 223 121.194 218.523 125 213 125 207.477 125 203 121.194 203 116.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M361 116.5C361 111.806 365.253 108 370.5 108 375.747 108 380 111.806 380 116.5 380 121.194 375.747 125 370.5 125 365.253 125 361 121.194 361 116.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M662 116.5C662 111.806 666.253 108 671.5 108 676.747 108 681 111.806 681 116.5 681 121.194 676.747 125 671.5 125 666.253 125 662 121.194 662 116.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M743 118C743 113.582 747.253 110 752.5 110 757.747 110 762 113.582 762 118 762 122.418 757.747 126 752.5 126 747.253 126 743 122.418 743 118Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M9 385 1054.1 385 1054.1 387 9 387ZM1052.76 382 1060.76 386 1052.76 390Z" fill="#156082"/>
+		<path d="M230 384.5C230 379.806 234.253 376 239.5 376 244.747 376 249 379.806 249 384.5 249 389.194 244.747 393 239.5 393 234.253 393 230 389.194 230 384.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<path d="M323 384.5C323 379.806 327.477 376 333 376 338.523 376 343 379.806 343 384.5 343 389.194 338.523 393 333 393 327.477 393 323 389.194 323 384.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<path d="M481 384.5C481 379.806 485.253 376 490.5 376 495.747 376 500 379.806 500 384.5 500 389.194 495.747 393 490.5 393 485.253 393 481 389.194 481 384.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<path d="M782 384.5C782 379.806 786.253 376 791.5 376 796.747 376 801 379.806 801 384.5 801 389.194 796.747 393 791.5 393 786.253 393 782 389.194 782 384.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<path d="M863 386.5C863 381.806 867.253 378 872.5 378 877.747 378 882 381.806 882 386.5 882 391.194 877.747 395 872.5 395 867.253 395 863 391.194 863 386.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<path d="M9 386.5C9 381.806 13.2533 378 18.5 378 23.7467 378 28 381.806 28 386.5 28 391.194 23.7467 395 18.5 395 13.2533 395 9 391.194 9 386.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M752 136C752 149.255 750.209 160 748 160L439 160C436.791 160 435 170.745 435 184 435 170.745 433.209 160 431 160L122 160C119.791 160 118 149.254 118 135.999" stroke="#156082" stroke-width="2" stroke-miterlimit="8" fill="none" fill-rule="evenodd"/>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(339.371 222)">Application</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(462.185 222)">sign (malware can steal session)</text>
+		<path d="M875 406C875 419.255 873.209 430 871 430L562 430C559.791 430 558 440.745 558 454 558 440.745 556.209 430 554 430L245 430C242.791 430 241 419.254 241 405.999" stroke="#156082" stroke-width="2" stroke-miterlimit="8" fill="none" fill-rule="evenodd"/>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(461.699 492)">Application</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(584.513 492)">sign</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(626.679 492)">-</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(634.846 492)">in</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(658.513 492)">(</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(665.513 492)">malware</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(760.273 492)">can</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(803.633 492)">present</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(882.806 492)">)</text>
+		<text fill="#AA222B" font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="700" font-size="32" transform="translate(20.5237 46)">DBSC device lifetime</text>
+		<text fill="#AA222B" font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="700" font-size="32" transform="translate(20.7337 319)">DBSC(e) device lifetime</text>
+		<path d="M72.5989 505.251 69.0179 498.097 70.8063 497.202 74.3873 504.355ZM66.3321 492.732 62.7512 485.578 64.5396 484.683 68.1206 491.836ZM60.0654 480.212 56.4844 473.059 58.2729 472.163 61.8539 479.317ZM53.7987 467.693 50.2177 460.54 52.0061 459.644 55.5871 466.798ZM47.5319 455.174 43.9509 448.021 45.7394 447.125 49.3204 454.279ZM41.2652 442.655 37.6842 435.501 39.4727 434.606 43.0536 441.76ZM34.9985 430.136 31.4175 422.982 33.2059 422.087 36.7869 429.241ZM28.7317 417.617 25.4668 411.095 27.2553 410.199 30.5202 416.722ZM24.7711 419.826 25.4727 408.872 34.662 414.875C35.1243 415.177 35.2543 415.796 34.9523 416.259 34.6503 416.721 34.0306 416.851 33.5682 416.549L25.8142 411.484 27.359 410.711 26.767 419.954C26.7317 420.505 26.2563 420.923 25.7051 420.888 25.1539 420.852 24.7358 420.377 24.7711 419.826Z" fill="#156082"/>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(82.136 511)">Device registration must</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(103.129 540)">be in a “clean room”</text>
+		<path d="M854 568.5C854 563.806 858.253 560 863.5 560 868.747 560 873 563.806 873 568.5 873 573.194 868.747 577 863.5 577 858.253 577 854 573.194 854 568.5Z" stroke="#622C0F" stroke-width="2" stroke-miterlimit="8" fill="#C00000" fill-rule="evenodd"/>
+		<path d="M856 602.5C856 597.806 860.253 594 865.5 594 870.747 594 875 597.806 875 602.5 875 607.194 870.747 611 865.5 611 860.253 611 856 607.194 856 602.5Z" stroke="#042433" stroke-width="2" stroke-miterlimit="8" fill="#156082" fill-rule="evenodd"/>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(899.013 576)">Risky operation</text>
+		<text font-family="Aptos,Aptos_MSFontService,sans-serif" font-weight="400" font-size="24" transform="translate(898.972 608)">Safe operation</text>
+	</g>
+</svg>
